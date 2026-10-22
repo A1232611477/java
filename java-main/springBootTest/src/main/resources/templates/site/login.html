@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{site/fragments :: head('登录 · 第五人格')}"></head>
+<body>
+<div th:replace="~{site/fragments :: stars}"></div>
+
+<main class="page">
+    <div class="card">
+        <header class="card-head">
+            <h2 class="card-title">登 录</h2>
+            <p class="sub">尚未缔结契约？<a th:href="@{/register}">注册新身份 →</a></p>
+        </header>
+
+        <!-- 提示横幅：注册成功 / 退出成功 / 登录态失效 / 被拦截到这里 -->
+        <div class="banner" th:if="${notice}" th:text="${notice}">注册成功</div>
+        <div class="banner" th:if="${param.containsKey('logout')}">已安全退出，期待你的归来。</div>
+        <div class="banner danger" th:if="${param.containsKey('expired')}">登录状态已失效，请重新登录。</div>
+        <div class="banner danger" th:if="${needLogin}">该页面需要登录，登录后会自动跳回去。</div>
+
+        <form th:action="@{/login}" th:object="${form}" method="post" novalidate>
+            <!-- 登录前想去哪：由拦截器带上，登录成功后原路跳回 -->
+            <input type="hidden" name="redirect" th:value="${redirect}">
+
+            <div class="field">
+                <label for="nickname">账号</label>
+                <div class="input-wrap">
+                    <span class="icon">✦</span>
+                    <input id="nickname" type="text" th:field="*{nickname}"
+                           placeholder="请输入账号（注册时的昵称）" autocomplete="username" autofocus>
+                </div>
+                <small class="err" th:errors="*{nickname}">账号不能为空</small>
+            </div>
+
+            <div class="field">
+                <label for="password">密码</label>
+                <div class="input-wrap">
+                    <span class="icon">⚷</span>
+                    <input id="password" type="password" th:field="*{password}"
+                           placeholder="请输入密码" autocomplete="current-password">
+                </div>
+                <small class="err" th:errors="*{password}">密码不能为空</small>
+            </div>
+
+            <button class="btn-primary" type="submit">穿 越 之 门</button>
+        </form>
+
+        <p class="hint">
+            登录成功后服务端会记一次会话（Session）并 <b>302 跳转</b> 到用户主页
+            <code>/home</code>；未登录直接访问 <code>/home</code> 会被重定向回这里。
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{site/fragments :: foot}"></footer>
+</body>
+</html>

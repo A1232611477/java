@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录成功</title>
+    <style>
+        body { font-family: "Microsoft YaHei", Arial, sans-serif; margin: 60px; color: #222; }
+        .box { max-width: 560px; padding: 28px 32px; border: 1px solid #e3e3e3; border-radius: 10px; }
+        h2 { margin-top: 0; }
+        .tip { color: #888; font-size: 14px; line-height: 1.8; }
+        a { color: #3b6ea5; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>欢迎，<span th:text="${username}">用户</span>！</h2>
+    <p class="tip">
+        登录成功（本页为 UserController 演示页面，密码校验写死为 <code>123</code>）。
+    </p>
+    <p><a th:href="@{/}">返回首页</a></p>
+</div>
+</body>
+</html>

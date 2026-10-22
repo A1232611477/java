@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<!--
+  公共片段：head / 星空背景 / 页脚
+  用法：<head th:replace="~{site/fragments :: head('页面标题')}"></head>
+-->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">第五人格 · 祭司主题</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+
+<!-- 星空背景（纯装饰，pointer-events:none 不影响点击） -->
+<div class="nightsky" th:fragment="stars">
+    <span class="stars"></span>
+    <span class="stars s2"></span>
+    <span class="stars s3"></span>
+</div>
+
+<footer class="site-foot" th:fragment="foot">
+    <p>© 第五人格 · 祭司主题演示页 · 原创视觉，非官方</p>
+    <p style="margin-top:.4rem"><a th:href="@{/}">首页</a> · <a th:href="@{/user/to_login}">教学演示页</a></p>
+</footer>
+
+</body>
+</html>

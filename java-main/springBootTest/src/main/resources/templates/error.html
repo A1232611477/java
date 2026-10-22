@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{site/fragments :: head('出错了 · 第五人格')}"></head>
+<body>
+<div th:replace="~{site/fragments :: stars}"></div>
+
+<main class="page">
+    <div class="card">
+        <header class="card-head">
+            <h2 class="card-title">门 后 迷 失 了</h2>
+            <p class="sub">页面出了一个意外，别担心，星光还在。</p>
+        </header>
+
+        <div class="info-list">
+            <div class="info-row">
+                <span class="k">状态码</span>
+                <span class="v" th:text="${status} ?: '—'">500</span>
+            </div>
+            <div class="info-row">
+                <span class="k">原因</span>
+                <span class="v" th:text="${error} ?: '未知错误'">服务器内部错误</span>
+            </div>
+            <div class="info-row" th:if="${path}">
+                <span class="k">请求路径</span>
+                <span class="v" th:text="${path}">/</span>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <a class="btn-ghost" th:href="@{/}">返 回 首 页</a>
+            <a class="btn-ghost" th:href="@{/login}">去 登 录</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{site/fragments :: foot}"></footer>
+</body>
+</html>

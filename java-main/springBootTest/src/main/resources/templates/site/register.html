@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{site/fragments :: head('注册 · 第五人格')}"></head>
+<body>
+<div th:replace="~{site/fragments :: stars}"></div>
+
+<main class="page">
+    <div class="card">
+        <header class="card-head">
+            <h2 class="card-title">注 册</h2>
+            <p class="sub">已有身份？<a th:href="@{/login}">返回登录 →</a></p>
+        </header>
+
+        <form th:action="@{/register}" th:object="${form}" method="post" novalidate>
+
+            <!-- 非字段级错误（例如数据库异常）。
+                 注意：#fields 系列表达式必须写在 th:object 表单内部，否则 Thymeleaf 会报
+                 「Could not bind form errors」并 500。 -->
+            <div class="banner danger" th:if="${#fields.hasGlobalErrors()}">
+                <p th:each="e : ${#fields.globalErrors()}" th:text="${e}">服务端异常</p>
+            </div>
+
+            <div class="field">
+                <label for="nickname">昵称</label>
+                <div class="input-wrap">
+                    <span class="icon">✧</span>
+                    <input id="nickname" type="text" th:field="*{nickname}"
+                           placeholder="为自己取一个名字" autocomplete="nickname" autofocus>
+                </div>
+                <small class="err" th:errors="*{nickname}">昵称不合法</small>
+            </div>
+
+            <div class="field">
+                <label for="password">密码</label>
+                <div class="input-wrap">
+                    <span class="icon">⚷</span>
+                    <input id="password" type="password" th:field="*{password}"
+                           placeholder="8-20 位，含字母与数字" autocomplete="new-password">
+                </div>
+                <small class="err" th:errors="*{password}">密码不合法</small>
+            </div>
+
+            <div class="field">
+                <label for="confirmPassword">确认密码</label>
+                <div class="input-wrap">
+                    <span class="icon">⚷</span>
+                    <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                           placeholder="请再次输入密码" autocomplete="new-password">
+                </div>
+                <small class="err" th:errors="*{confirmPassword}">两次密码不一致</small>
+            </div>
+
+            <button class="btn-primary" type="submit">缔 约 注 册</button>
+        </form>
+
+        <p class="hint">
+            注册成功后会自动 <b>302 跳转</b> 到登录页，昵称帮你填好，输入密码即可进入用户主页。
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{site/fragments :: foot}"></footer>
+</body>
+</html>

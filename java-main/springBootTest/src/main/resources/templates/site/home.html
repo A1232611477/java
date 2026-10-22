@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{site/fragments :: head('用户主页 · 第五人格')}"></head>
+<body>
+<div th:replace="~{site/fragments :: stars}"></div>
+
+<main class="page">
+    <div class="card wide">
+        <header class="card-head">
+            <h2 class="card-title">星 之 契 约</h2>
+            <p class="sub">欢迎归来，<b th:text="${user.nickname}">旅行者</b></p>
+        </header>
+
+        <div class="info-list">
+            <div class="info-row">
+                <span class="k">用户 ID</span>
+                <span class="v" th:text="${user.id}">1</span>
+            </div>
+            <div class="info-row">
+                <span class="k">昵称</span>
+                <span class="v" th:text="${user.nickname}">祭司</span>
+            </div>
+            <div class="info-row">
+                <span class="k">账号状态</span>
+                <span class="v" th:text="${user.status != null and user.status == 1} ? '已禁用' : '正常'">正常</span>
+            </div>
+            <div class="info-row">
+                <span class="k">注册时间</span>
+                <span class="v"
+                      th:text="${user.createdAt != null} ? ${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm:ss')} : '—'">—</span>
+            </div>
+        </div>
+
+        <p class="hint">
+            本页需要登录才能访问（<code>GET /home</code>，由 <code>PageAuthInterceptor</code> 把关）。
+            这条链路用的是传统的 <b>Session</b> 登录态，和前端 Vue 那套无状态 <b>JWT</b> 相互独立，
+            但读的是同一张 <code>t_user</code> 表 —— 所以在页面上注册的账号，也能在前端登录页登录。
+        </p>
+
+        <div class="btn-row">
+            <a class="btn-ghost" th:href="@{/}">返 回 首 页</a>
+            <form class="logout-form" th:action="@{/logout}" method="post">
+                <button class="btn-primary" type="submit">退 出 登 录</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{site/fragments :: foot}"></footer>
+</body>
+</html>

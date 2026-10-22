@@ -1,0 +1,219 @@
+/* ============================================================================
+   第五人格 · 祭司主题 —— 后端 Thymeleaf 页面样式
+   配色与前端 Vue 项目（第五人格/src/style.css）保持一致：深蓝夜空 + 鎏金
+   ============================================================================ */
+
+:root {
+  --ink-1: #04081a;
+  --ink-2: #081230;
+  --ink-3: #102248;
+  --blue: #2b5bb5;
+  --blue-light: #7fa8e8;
+  --gold: #d8b15a;
+  --gold-light: #f6e1a4;
+  --text: #eaf1ff;
+  --muted: #9fb2d8;
+  --star: #cfe0ff;
+  --card: rgba(9, 20, 46, 0.55);
+  --border: rgba(216, 177, 90, 0.4);
+  --font: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-ui: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: radial-gradient(150% 130% at 18% -10%, var(--ink-3) 0%, var(--ink-2) 40%, var(--ink-1) 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------- 星空背景 ---------- */
+.nightsky { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.nightsky::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(40% 35% at 75% 20%, rgba(43, 91, 181, 0.22), transparent 70%),
+    radial-gradient(45% 40% at 15% 80%, rgba(216, 177, 90, 0.12), transparent 70%);
+  filter: blur(6px);
+}
+.stars {
+  position: absolute; inset: -50%;
+  background-repeat: repeat;
+  background-image:
+    radial-gradient(1.4px 1.4px at 20px 30px, var(--star), transparent),
+    radial-gradient(1.2px 1.2px at 120px 80px, #fff, transparent),
+    radial-gradient(1px 1px at 200px 160px, var(--star), transparent),
+    radial-gradient(1.6px 1.6px at 300px 60px, #fff, transparent),
+    radial-gradient(1px 1px at 380px 220px, var(--star), transparent),
+    radial-gradient(1.3px 1.3px at 90px 250px, #fff, transparent);
+  background-size: 420px 320px;
+  animation: twinkle 5.5s ease-in-out infinite alternate;
+}
+.stars.s2 { background-size: 240px 200px; opacity: 0.55; animation-duration: 8.5s; animation-direction: alternate-reverse; }
+.stars.s3 { background-size: 600px 480px; opacity: 0.35; animation-duration: 12s; }
+@keyframes twinkle { from { opacity: 0.3; } to { opacity: 0.92; } }
+
+/* ---------- 布局 ---------- */
+.page {
+  position: relative; z-index: 1; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem 1.5rem;
+}
+
+.card {
+  width: 100%; max-width: 440px;
+  padding: 2.2rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.card.wide { max-width: 560px; }
+
+/* ---------- 品牌标题 ---------- */
+.brand-mark { text-align: center; margin-bottom: 1.6rem; }
+.brand-mark .eyebrow {
+  color: var(--gold); font-size: 0.72rem; letter-spacing: 0.42em; text-transform: uppercase;
+}
+.brand-mark h1 {
+  font-family: var(--font); font-size: 1.65rem; font-weight: 600;
+  letter-spacing: 0.14em; color: var(--gold-light);
+  margin-top: 0.6rem; text-shadow: 0 0 24px rgba(216, 177, 90, 0.35);
+}
+.brand-mark .sub { color: var(--muted); font-size: 0.8rem; margin-top: 0.5rem; letter-spacing: 0.06em; }
+
+.card-head { margin-bottom: 1.4rem; }
+.card-title {
+  font-family: var(--font); font-size: 1.35rem; font-weight: 600;
+  letter-spacing: 0.16em; color: var(--gold-light);
+}
+.card-head .sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.45rem; }
+.card-head a { color: var(--blue-light); text-decoration: none; }
+.card-head a:hover { color: var(--gold-light); }
+
+/* ---------- 表单 ---------- */
+.field { margin-bottom: 1.05rem; }
+.field label {
+  display: block; color: var(--muted); font-size: 0.8rem;
+  letter-spacing: 0.08em; margin-bottom: 0.45rem;
+}
+.input-wrap {
+  display: flex; align-items: center; padding: 0 0.95rem;
+  background: rgba(4, 8, 26, 0.55);
+  border: 1px solid rgba(159, 178, 216, 0.22);
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input-wrap:focus-within {
+  border-color: var(--gold);
+  background: rgba(216, 177, 90, 0.06);
+  box-shadow: 0 0 0 3px rgba(216, 177, 90, 0.16);
+}
+.input-wrap .icon { color: var(--gold); margin-right: 0.6rem; font-size: 0.95rem; }
+.input-wrap input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text); font-size: 0.96rem; padding: 0.85rem 0;
+  font-family: var(--font-ui);
+}
+.input-wrap input::placeholder { color: rgba(159, 178, 216, 0.55); }
+
+.err { display: block; color: #ff9a9a; font-size: 0.78rem; margin-top: 0.4rem; }
+
+/* ---------- 提示横幅 ---------- */
+.banner {
+  padding: 0.7rem 0.9rem; border-radius: 10px; font-size: 0.85rem;
+  line-height: 1.6; margin-bottom: 1.1rem;
+  border: 1px solid rgba(216, 177, 90, 0.35);
+  background: rgba(216, 177, 90, 0.1);
+  color: var(--gold-light);
+}
+.banner.danger {
+  border-color: rgba(255, 154, 154, 0.4);
+  background: rgba(255, 120, 120, 0.1);
+  color: #ff9a9a;
+}
+
+/* ---------- 按钮 ---------- */
+.btn-primary {
+  display: block; width: 100%; margin-top: 1.2rem; padding: 0.95rem;
+  border: none; border-radius: 12px; cursor: pointer;
+  font-family: var(--font); font-size: 1rem; font-weight: 600; letter-spacing: 0.28em;
+  color: #1a1206;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  box-shadow: 0 10px 26px rgba(216, 177, 90, 0.28);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 32px rgba(216, 177, 90, 0.4); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: block; width: 100%; text-align: center; text-decoration: none;
+  padding: 0.95rem; border-radius: 12px; cursor: pointer;
+  background: transparent; color: #cdd9f2;
+  border: 1px solid rgba(159, 178, 216, 0.32);
+  font-family: var(--font-ui); font-size: 0.95rem; letter-spacing: 0.12em;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(216, 177, 90, 0.1); }
+
+/* ---------- 首页入口 ---------- */
+.entry-row { display: grid; gap: 0.8rem; }
+.entry {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  text-decoration: none; padding: 1rem 1.2rem; border-radius: 14px;
+  border: 1px solid rgba(159, 178, 216, 0.22);
+  background: rgba(4, 8, 26, 0.5);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.entry:hover { border-color: var(--gold); background: rgba(216, 177, 90, 0.09); transform: translateX(3px); }
+.entry .t {
+  display: block; font-family: var(--font); color: var(--gold-light);
+  font-size: 1.02rem; letter-spacing: 0.14em;
+}
+.entry .d { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 0.3rem; letter-spacing: 0.04em; }
+.entry .arrow { color: var(--gold); font-size: 1.05rem; flex: none; }
+
+/* ---------- 用户主页 ---------- */
+.info-list { margin-bottom: 1.3rem; }
+.info-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.7rem 0.9rem; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(159, 178, 216, 0.16);
+  margin-bottom: 0.55rem;
+}
+.info-row .k { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.03em; flex: none; }
+.info-row .v { color: var(--gold-light); font-size: 0.92rem; text-align: right; word-break: break-all; }
+
+.btn-row { display: grid; gap: 0.7rem; margin-top: 1.4rem; }
+.logout-form { margin: 0; }
+.btn-row .btn-primary { margin-top: 0; }
+
+/* ---------- 其它 ---------- */
+.site-foot {
+  position: relative; z-index: 1; text-align: center;
+  padding: 1.4rem; color: rgba(159, 178, 216, 0.6);
+  font-size: 0.75rem; letter-spacing: 0.06em;
+}
+.site-foot a { color: rgba(127, 168, 232, 0.85); text-decoration: none; }
+.site-foot a:hover { color: var(--gold-light); }
+
+.hint {
+  margin-top: 1.3rem; color: rgba(159, 178, 216, 0.75);
+  font-size: 0.78rem; line-height: 1.75;
+}
+.hint b { color: var(--gold-light); font-weight: 600; }
+
+code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px; padding: 0.1em 0.35em;
+  color: var(--blue-light); font-size: 0.94em;
+}

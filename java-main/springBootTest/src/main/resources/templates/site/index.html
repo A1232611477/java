@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{site/fragments :: head('推开命运之门 · 第五人格')}"></head>
+<body>
+<div th:replace="~{site/fragments :: stars}"></div>
+
+<main class="page">
+    <div class="card">
+        <div class="brand-mark">
+            <p class="eyebrow">IDENTITY V</p>
+            <h1>缔 结 星 之 契 约</h1>
+            <p class="sub">第五人格 · 祭司主题 · 演示站点</p>
+        </div>
+
+        <div class="entry-row">
+            <a class="entry" th:href="@{/login}">
+                <span>
+                    <span class="t">登 录</span>
+                    <span class="d">已有身份？推开命运之门</span>
+                </span>
+                <span class="arrow">→</span>
+            </a>
+            <a class="entry" th:href="@{/register}">
+                <span>
+                    <span class="t">注 册</span>
+                    <span class="d">以星光为印，缔结新的契约</span>
+                </span>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+
+        <p class="hint">
+            这是后端的 Thymeleaf 页面流程（首页 → 注册 → 登录 → 用户主页 → 退出），
+            数据落在 MySQL 的 <code>t_user</code> 表，密码用 <code>BCrypt</code> 加密。
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{site/fragments :: foot}"></footer>
+</body>
+</html>
