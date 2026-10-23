@@ -1,5 +1,6 @@
 package com.fenglin.springboottest.config;
 
+import com.fenglin.springboottest.interceptor.AdminInterceptor;
 import com.fenglin.springboottest.interceptor.JwtInterceptor;
 import com.fenglin.springboottest.web.PageAuthInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -24,10 +25,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
     private final PageAuthInterceptor pageAuthInterceptor;
+    private final AdminInterceptor adminInterceptor;
 
-    public WebMvcConfig(JwtInterceptor jwtInterceptor, PageAuthInterceptor pageAuthInterceptor) {
+    public WebMvcConfig(JwtInterceptor jwtInterceptor, PageAuthInterceptor pageAuthInterceptor,
+                        AdminInterceptor adminInterceptor) {
         this.jwtInterceptor = jwtInterceptor;
         this.pageAuthInterceptor = pageAuthInterceptor;
+        this.adminInterceptor = adminInterceptor;
     }
 
     @Override
@@ -36,8 +40,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         "/api/auth/register",
-                        "/api/auth/login"
+                        "/api/auth/login",
+                        // 后台管理员登录是白名单，不需要携带用户 JWT
+                        "/api/admin/login"
                 );
+
+        // 后台管理接口：在 JWT 校验通过后，再校验角色必须为 ADMIN
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/api/admin/**")
+                .excludePathPatterns("/api/admin/login");
 
         // 服务器端页面：只有用户主页需要登录，未登录会被重定向到 /login?redirect=...
         registry.addInterceptor(pageAuthInterceptor)

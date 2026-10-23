@@ -29,6 +29,9 @@
           <button type="submit" class="nav-search-btn">搜索</button>
         </form>
 
+        <!-- 后台管理系统入口：仅登录页，无注册 -->
+        <RouterLink to="/admin/login" class="nav-admin">后台管理</RouterLink>
+
         <div v-if="user" class="nav-user" @click="userOpen = !userOpen">
           <span class="nav-avatar">{{ initial }}</span>
           <span class="nav-nick">{{ user.nickname }}</span>

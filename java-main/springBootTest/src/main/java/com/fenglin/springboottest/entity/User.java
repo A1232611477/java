@@ -26,6 +26,9 @@ public class User {
     /** 状态：0 正常，1 禁用 */
     private Integer status;
 
+    /** 角色：USER 普通用户，ADMIN 管理员 */
+    private String role;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
@@ -62,6 +65,14 @@ public class User {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -38,9 +38,9 @@ public class JwtUtil {
         this.rememberExpireMillis = rememberExpireMinutes * 60_000L;
     }
 
-    /** 签发令牌（普通有效期） */
+    /** 签发令牌（普通有效期，无角色） */
     public String generate(Long userId, String nickname) {
-        return generate(userId, nickname, false);
+        return generate(userId, nickname, null, false);
     }
 
     /**
@@ -49,10 +49,21 @@ public class JwtUtil {
      * @param rememberMe 前端勾选「记住我」时传 true，签发长效令牌
      */
     public String generate(Long userId, String nickname, boolean rememberMe) {
+        return generate(userId, nickname, null, rememberMe);
+    }
+
+    /**
+     * 签发令牌（带角色，供后台管理员鉴权使用）
+     *
+     * @param role       角色：USER / ADMIN，写入令牌载荷
+     * @param rememberMe 前端勾选「记住我」时传 true，签发长效令牌
+     */
+    public String generate(Long userId, String nickname, String role, boolean rememberMe) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("nickname", nickname)
+                .claim("role", role == null ? "USER" : role)
                 .claim("rm", rememberMe)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + ttlMillis(rememberMe)))

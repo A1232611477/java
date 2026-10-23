@@ -12,6 +12,7 @@ public class UserVO {
     private Long id;
     private String nickname;
     private Integer status;
+    private String role;
     private LocalDateTime createdAt;
 
     public static UserVO from(User user) {
@@ -19,6 +20,7 @@ public class UserVO {
         vo.setId(user.getId());
         vo.setNickname(user.getNickname());
         vo.setStatus(user.getStatus());
+        vo.setRole(user.getRole());
         vo.setCreatedAt(user.getCreatedAt());
         return vo;
     }
@@ -45,6 +47,14 @@ public class UserVO {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public LocalDateTime getCreatedAt() {

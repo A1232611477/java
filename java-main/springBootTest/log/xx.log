@@ -167,3 +167,169 @@ Identify and stop the process that's listening on port 8099 or configure this ap
 2026-10-15 14:55:05  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-2 - Start completed.
 2026-10-15 14:55:05  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 该昵称已被注册]
 2026-10-15 14:55:05  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:03:57  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 9184 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:03:57  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:03:57  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-23 14:03:57  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-23 14:03:58  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-10-23 14:03:58  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:03:58  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:03:58  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-10-23 14:03:58  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 1231 ms
+2026-10-23 14:03:58  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-10-23 14:03:59  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-10-23 14:03:59  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-10-23 14:03:59  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 2.656 seconds (process running for 3.082)
+2026-10-23 14:04:11  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-23 14:04:11  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
+2026-10-23 14:04:11  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 1 ms
+2026-10-23 14:04:12  INFO com.zaxxer.hikari.HikariDataSource.getConnection 109:HikariPool-1 - Starting...
+2026-10-23 14:04:12  INFO com.zaxxer.hikari.pool.HikariPool.checkFailFast 554:HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@430f16d
+2026-10-23 14:04:12  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-1 - Start completed.
+2026-10-23 14:38:58  INFO o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener.onApplicationEvent 211:Restarting due to 35 class path changes (0 additions, 35 deletions, 0 modifications)
+2026-10-23 14:38:58  INFO o.s.boot.web.embedded.tomcat.GracefulShutdown.shutDownGracefully 54:Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-23 14:38:58  INFO o.s.boot.web.embedded.tomcat.GracefulShutdown.doShutdown 76:Graceful shutdown complete
+2026-10-23 14:38:58  INFO com.zaxxer.hikari.HikariDataSource.close 349:HikariPool-1 - Shutdown initiated...
+2026-10-23 14:38:58  INFO com.zaxxer.hikari.HikariDataSource.close 351:HikariPool-1 - Shutdown completed.
+2026-10-23 14:38:58  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 9184 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:38:58  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:38:58  WARN org.mybatis.spring.mapper.ClassPathMapperScanner.warn 44:No MyBatis mapper was found in '[com.fenglin.springboottest.mapper]' package. Please check your configuration.
+2026-10-23 14:38:58  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-10-23 14:38:58  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:38:58  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:38:58  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-10-23 14:38:58  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 212 ms
+2026-10-23 14:38:58  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-10-23 14:38:58  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-10-23 14:38:58  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-10-23 14:38:58  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 0.369 seconds (process running for 2102.79)
+2026-10-23 14:38:58  INFO o.s.b.d.a.ConditionEvaluationDeltaLoggingListener.onApplicationEvent 63:Condition evaluation unchanged
+2026-10-23 14:39:00  INFO o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener.onApplicationEvent 211:Restarting due to 44 class path changes (44 additions, 0 deletions, 0 modifications)
+2026-10-23 14:39:00  INFO o.s.boot.web.embedded.tomcat.GracefulShutdown.shutDownGracefully 54:Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-23 14:39:00  INFO o.s.boot.web.embedded.tomcat.GracefulShutdown.doShutdown 76:Graceful shutdown complete
+2026-10-23 14:39:00  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 9184 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:39:00  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:39:00  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-10-23 14:39:00  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:39:00  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:39:00  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-10-23 14:39:00  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 148 ms
+2026-10-23 14:39:01  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-10-23 14:39:01  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-10-23 14:39:01  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-10-23 14:39:01  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 0.309 seconds (process running for 2105.002)
+2026-10-23 14:39:01  INFO com.zaxxer.hikari.HikariDataSource.getConnection 109:HikariPool-2 - Starting...
+2026-10-23 14:39:01  INFO com.zaxxer.hikari.pool.HikariPool.checkFailFast 554:HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4dfc1422
+2026-10-23 14:39:01  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-2 - Start completed.
+2026-10-23 14:39:01  WARN c.f.springboottest.config.AdminDataInitializer.run 49:内置管理员账号初始化失败（可先执行最新 sql/init.sql）：
+### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column 'role' in 'field list'
+### The error may exist in com/fenglin/springboottest/mapper/UserMapper.java (best guess)
+### The error may involve com.fenglin.springboottest.mapper.UserMapper.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO t_user  ( nickname, password, status, role, created_at, updated_at )  VALUES (  ?, ?, ?, ?, ?, ?  )
+### Cause: java.sql.SQLSyntaxErrorException: Unknown column 'role' in 'field list'
+; bad SQL grammar []
+2026-10-23 14:39:01  INFO o.s.b.d.a.ConditionEvaluationDeltaLoggingListener.onApplicationEvent 63:Condition evaluation unchanged
+2026-10-23 14:41:16  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 5252 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:41:16  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:41:16  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-23 14:41:16  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-23 14:41:17  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 57894 (http)
+2026-10-23 14:41:17  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:41:17  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:41:20  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-23 14:41:20  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
+2026-10-23 14:41:20  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 0 ms
+2026-10-23 14:41:20  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:22  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:25  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:27  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:30  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:32  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:34  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:37  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:39  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:42  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:44  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:47  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:49  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:52  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:54  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:56  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:41:59  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:01  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:04  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:06  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:09  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:11  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:14  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:16  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:19  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:21  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:23  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:26  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:28  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:31  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:33  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:36  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:38  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:41  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:43  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:46  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:48  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:51  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:53  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:42:56  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:43:20  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 未登录，请先登录]
+2026-10-23 14:44:10  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 11340 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:44:10  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:44:10  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-23 14:44:10  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-23 14:44:12  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 57894 (http)
+2026-10-23 14:44:12  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:44:12  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:44:12  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-10-23 14:44:12  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 1483 ms
+2026-10-23 14:44:13  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-10-23 14:44:13  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-10-23 14:44:13  WARN o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext.refresh 635:Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-10-23 14:44:13  INFO o.s.b.a.logging.ConditionEvaluationReportLogger.logMessage 82:
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-10-23 14:44:13  ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter.report 40:
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 57894 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 57894 or configure this application to listen on another port.
+
+2026-10-23 14:53:17  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 8368 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-10-23 14:53:17  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-10-23 14:53:17  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-23 14:53:17  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-23 14:53:18  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-10-23 14:53:18  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-10-23 14:53:18  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-10-23 14:53:18  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-10-23 14:53:18  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 1016 ms
+2026-10-23 14:53:19  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-10-23 14:53:19  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-10-23 14:53:19  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-10-23 14:53:19  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 2.047 seconds (process running for 2.331)
+2026-10-23 14:53:19  INFO com.zaxxer.hikari.HikariDataSource.getConnection 109:HikariPool-1 - Starting...
+2026-10-23 14:53:19  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-23 14:53:19  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
+2026-10-23 14:53:19  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 1 ms
+2026-10-23 14:53:19  INFO com.zaxxer.hikari.pool.HikariPool.checkFailFast 554:HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@8be8178
+2026-10-23 14:53:19  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-1 - Start completed.
+2026-10-23 14:53:19  INFO c.f.springboottest.config.AdminDataInitializer.run 46:已创建内置管理员账号：admin / admin123（角色 ADMIN）
+2026-10-23 14:53:31  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 账号或密码错误]
+2026-10-23 14:53:51  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 账号或密码错误]
+2026-10-23 14:54:14  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 该昵称已被注册]

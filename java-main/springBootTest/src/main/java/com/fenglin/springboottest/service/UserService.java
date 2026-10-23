@@ -55,6 +55,7 @@ public class UserService {
         user.setNickname(name);
         user.setPassword(encoder.encode(rawPassword));
         user.setStatus(0);
+        user.setRole("USER");
         userMapper.insert(user);
         return user;
     }
@@ -93,7 +94,30 @@ public class UserService {
         boolean remember = req.isRememberMe();
 
         LoginResponse resp = new LoginResponse();
-        resp.setToken(jwtUtil.generate(user.getId(), user.getNickname(), remember));
+        resp.setToken(jwtUtil.generate(user.getId(), user.getNickname(), user.getRole(), remember));
+        resp.setTokenType("Bearer");
+        resp.setExpiresIn(jwtUtil.getExpireSeconds(remember));
+        resp.setUser(UserVO.from(user));
+        return resp;
+    }
+
+    /**
+     * 管理员登录：先校验账号密码，再校验角色必须为 ADMIN
+     *
+     * <p>复用 {@link #authenticate} 做账号密码校验，令牌中写入角色声明，
+     * 供 {@code AdminInterceptor} 鉴别后台权限。</p>
+     *
+     * @throws BizException 401 账号或密码错误；403 账号被禁用或不是管理员
+     */
+    public LoginResponse adminLogin(LoginRequest req) {
+        User user = authenticate(req.getNickname(), req.getPassword());
+        if (!"ADMIN".equals(user.getRole())) {
+            throw new BizException(403, "该账号不是管理员，无法登录后台");
+        }
+        boolean remember = req.isRememberMe();
+
+        LoginResponse resp = new LoginResponse();
+        resp.setToken(jwtUtil.generate(user.getId(), user.getNickname(), user.getRole(), remember));
         resp.setTokenType("Bearer");
         resp.setExpiresIn(jwtUtil.getExpireSeconds(remember));
         resp.setUser(UserVO.from(user));

@@ -86,6 +86,40 @@ export function clearAuth() {
   }
 }
 
+// ---------- 管理员令牌（与用户令牌隔离，独立存储） ----------
+// 后台管理系统使用一套独立的管理员令牌，避免和普通用户登录态互相覆盖。
+const ADMIN_TOKEN_KEY = 'idv_admin_token'
+const ADMIN_USER_KEY = 'idv_admin_user'
+
+export function getAdminToken() {
+  return (
+    window.localStorage.getItem(ADMIN_TOKEN_KEY) ||
+    window.sessionStorage.getItem(ADMIN_TOKEN_KEY) ||
+    ''
+  )
+}
+
+export function saveAdminAuth(token, user) {
+  clearAdminAuth()
+  window.localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  window.localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(user || null))
+}
+
+export function readAdminUser() {
+  try {
+    return JSON.parse(window.localStorage.getItem(ADMIN_USER_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+export function clearAdminAuth() {
+  for (const box of boxes()) {
+    box.removeItem(ADMIN_TOKEN_KEY)
+    box.removeItem(ADMIN_USER_KEY)
+  }
+}
+
 // ---------- 错误类型 ----------
 
 /**
@@ -102,16 +136,18 @@ export class ApiError extends Error {
 // ---------- 请求 ----------
 
 /**
- * @param {string} path   以 / 开头的接口路径，如 /api/auth/login
- * @param {object} options method / body / auth(是否携带令牌，默认 true)
+ * 带显式令牌的请求（供后台管理员接口复用，避免与用户令牌耦合）
+ *
+ * @param {string} path        以 / 开头的接口路径
+ * @param {object} options     method / body
+ * @param {string} authHeader  完整 Authorization 头，如 "Bearer xxx"；为空则不带
  */
-export async function request(path, options = {}) {
-  const { method = 'GET', body, auth = true } = options
+export async function requestWithToken(path, options = {}, authHeader = '') {
+  const { method = 'GET', body } = options
 
   const headers = {}
   if (body !== undefined) headers['Content-Type'] = 'application/json'
-  const token = getToken()
-  if (auth && token) headers['Authorization'] = `Bearer ${token}`
+  if (authHeader) headers['Authorization'] = authHeader
 
   let res
   try {
@@ -143,6 +179,17 @@ export async function request(path, options = {}) {
     throw new ApiError(payload.code, payload.message || '请求失败')
   }
   return payload.data
+}
+
+/**
+ * @param {string} path   以 / 开头的接口路径，如 /api/auth/login
+ * @param {object} options method / body / auth(是否携带令牌，默认 true)
+ */
+export async function request(path, options = {}) {
+  const { auth = true } = options
+  const token = getToken()
+  const authHeader = (auth && token) ? `Bearer ${token}` : ''
+  return requestWithToken(path, options, authHeader)
 }
 
 export { API_BASE }

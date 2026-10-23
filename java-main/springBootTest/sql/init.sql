@@ -27,6 +27,16 @@ CREATE TABLE IF NOT EXISTS `t_user` (
   COLLATE = utf8mb4_general_ci
   COMMENT = '用户表';
 
+-- 3.1 为用户表增加角色字段（幂等：已存在则跳过）。USER 普通用户，ADMIN 管理员
+SET @exist_role := (SELECT COUNT(*) FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 't_user' AND column_name = 'role');
+SET @sql_role := IF(@exist_role = 0,
+  "ALTER TABLE `t_user` ADD COLUMN `role` VARCHAR(20) NOT NULL DEFAULT 'USER' COMMENT '角色：USER 普通用户，ADMIN 管理员'",
+  'SELECT 1');
+PREPARE stmt_role FROM @sql_role;
+EXECUTE stmt_role;
+DEALLOCATE PREPARE stmt_role;
+
 -- ============================================================================
 -- 门户首页 & 搜索 - 分级分类与内容表
 -- ============================================================================
