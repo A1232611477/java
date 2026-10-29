@@ -1,5 +1,4 @@
 <template>
-  <NightSky />
   <router-view v-slot="{ Component }">
     <transition name="fade" mode="out-in">
       <component :is="Component" />
@@ -9,7 +8,6 @@
 </template>
 
 <script setup>
-import NightSky from './components/NightSky.vue'
 import Toast from './components/Toast.vue'
 </script>
 

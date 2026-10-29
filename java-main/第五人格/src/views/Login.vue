@@ -1,5 +1,7 @@
 <template>
   <main class="shell">
+    <!-- 星空 / 流星叠加在立绘背景之上、文字之下 -->
+    <NightSky />
     <section class="brand">
       <div class="brand-inner">
         <DoorPortal />
@@ -75,6 +77,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DoorPortal from '../components/DoorPortal.vue'
+import NightSky from '../components/NightSky.vue'
 import { useToast } from '../composables/useToast'
 import { useAuth } from '../stores/auth'
 import { ApiError } from '../api/http'

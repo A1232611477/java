@@ -1,10 +1,12 @@
 <template>
   <div class="home">
+    <!-- 星空 / 流星叠加在立绘背景之上、文字之下 -->
+    <NightSky />
     <!-- 导航栏（含搜索栏） -->
     <NavBar @search="onSearch" @navigate="onNavigate" />
 
     <main class="home-main">
-      <!-- 主视觉 -->
+      <!-- 主视觉（全屏立绘背景 + 标题浮层） -->
       <section class="hero">
         <p class="eyebrow">IDENTITY V · 第五人格</p>
         <h1 class="hero-title">命运之门，为你而启</h1>
@@ -107,6 +109,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
+import NightSky from '../components/NightSky.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import { ApiError } from '../api/http'
