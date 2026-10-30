@@ -3,6 +3,7 @@ package com.fenglin.springboottest.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fenglin.springboottest.dto.CategoryNodeVO;
+import com.fenglin.springboottest.dto.ContentDetailVO;
 import com.fenglin.springboottest.dto.ContentSummaryVO;
 import com.fenglin.springboottest.dto.HomeVO;
 import com.fenglin.springboottest.dto.SearchResultVO;
@@ -42,6 +43,37 @@ public class HomeService {
         vo.setCategories(buildCategoryTree());
         vo.setFeatured(getFeatured(6));
         return vo;
+    }
+
+    /**
+     * 内容详情（含正文），供攻略/资讯等详情弹窗展示
+     *
+     * @param id 内容 id
+     * @return 详情 VO；不存在或未发布返回 null
+     */
+    public ContentDetailVO getDetail(Long id) {
+        if (id == null) {
+            return null;
+        }
+        Content c = contentMapper.selectById(id);
+        if (c == null || c.getStatus() == null || c.getStatus() != 1) {
+            return null;
+        }
+        Map<Long, String> catName = categoryNameMap();
+        ContentDetailVO v = new ContentDetailVO();
+        v.setId(c.getId());
+        v.setTitle(c.getTitle());
+        v.setSummary(c.getSummary());
+        v.setCoverUrl(c.getCoverUrl());
+        v.setVideoUrl(c.getVideoUrl());
+        v.setContent(c.getContent());
+        v.setAuthor(c.getAuthor());
+        v.setTags(c.getTags());
+        v.setViewCount(c.getViewCount());
+        v.setCreatedAt(c.getCreatedAt());
+        v.setCategory(catName.getOrDefault(c.getTopCategoryId(), ""));
+        v.setSubCategory(catName.getOrDefault(c.getCategoryId(), ""));
+        return v;
     }
 
     /**
@@ -143,6 +175,7 @@ public class HomeService {
         v.setTitle(c.getTitle());
         v.setDesc(c.getSummary());
         v.setCoverUrl(c.getCoverUrl());
+        v.setVideoUrl(c.getVideoUrl());
         v.setAuthor(c.getAuthor());
         v.setTags(c.getTags());
         v.setViewCount(c.getViewCount());

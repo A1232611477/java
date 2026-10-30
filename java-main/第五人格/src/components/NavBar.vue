@@ -35,10 +35,6 @@
         <div v-if="user" class="nav-user" @click="userOpen = !userOpen">
           <span class="nav-avatar">{{ initial }}</span>
           <span class="nav-nick">{{ user.nickname }}</span>
-          <div v-if="userOpen" class="nav-user-menu" @click.stop>
-            <button type="button" @click="onCenter">个人中心</button>
-            <button type="button" @click="onLogout">退出登录</button>
-          </div>
         </div>
         <RouterLink v-else to="/login" class="nav-login">登录</RouterLink>
       </div>
@@ -46,6 +42,42 @@
   </header>
 
   <div v-if="userOpen" class="nav-backdrop" @click="userOpen = false"></div>
+
+  <!-- 个人中心浮层卡片（点击头像弹出） -->
+  <Transition name="drop">
+    <div v-if="userOpen && user" class="user-panel" @click.stop>
+      <div class="up-head">
+        <span class="up-avatar">{{ initial }}</span>
+        <div class="up-id">
+          <p class="up-nick">{{ user.nickname }}</p>
+          <p class="up-uid">UID · {{ user.id ?? '—' }}</p>
+        </div>
+        <span class="up-badge" :class="user.status === 1 ? 'off' : 'on'">{{ user.status === 1 ? '已禁用' : '在线' }}</span>
+      </div>
+
+      <div class="up-body">
+        <div class="up-row">
+          <span class="up-k">账号状态</span>
+          <span class="up-v">{{ statusText }}</span>
+        </div>
+        <div class="up-row">
+          <span class="up-k">注册时间</span>
+          <span class="up-v">{{ createdAt }}</span>
+        </div>
+        <div class="up-row token">
+          <span class="up-k">登录令牌</span>
+          <span class="up-token">{{ shortToken }}</span>
+        </div>
+      </div>
+
+      <div class="up-foot">
+        <button type="button" class="up-btn primary" :disabled="loading" @click="onVerify">
+          {{ loading ? '校验中…' : '校验登录态' }}
+        </button>
+        <button type="button" class="up-btn ghost" @click="onLogout">退出登录</button>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -53,12 +85,13 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
+import { ApiError } from '../api/http'
 
 const emit = defineEmits(['search', 'navigate'])
 
 const router = useRouter()
 const { show } = useToast()
-const { user, signOut } = useAuth()
+const { user, token, loading, refresh, signOut } = useAuth()
 
 const menus = ['首页', '角色图鉴', '资讯公告', '玩法攻略', '赛事中心', '玩家社区', '周边商城']
 const query = ref('')
@@ -66,6 +99,26 @@ const menuOpen = ref(false)
 const userOpen = ref(false)
 
 const initial = computed(() => (user.value?.nickname || '旅').slice(0, 1))
+const statusText = computed(() => (user.value?.status === 1 ? '已禁用' : '正常'))
+const createdAt = computed(() =>
+  user.value?.createdAt ? String(user.value.createdAt).replace('T', ' ').slice(0, 19) : '—'
+)
+const shortToken = computed(() =>
+  token.value ? `${token.value.slice(0, 20)}……${token.value.slice(-8)}` : '（无令牌）'
+)
+
+async function onVerify() {
+  try {
+    await refresh()
+    show('登录态有效 ✦ 服务端已确认你的身份')
+  } catch (e) {
+    show(e instanceof ApiError ? e.message : '校验失败')
+    if (e instanceof ApiError && e.code === 401) {
+      userOpen.value = false
+      router.replace({ name: 'login' })
+    }
+  }
+}
 
 function doSearch() {
   const q = query.value.trim()
@@ -80,11 +133,6 @@ function doSearch() {
 function onNav(item) {
   menuOpen.value = false
   emit('navigate', item)
-}
-
-function onCenter() {
-  userOpen.value = false
-  emit('navigate', '个人中心')
 }
 
 function onLogout() {

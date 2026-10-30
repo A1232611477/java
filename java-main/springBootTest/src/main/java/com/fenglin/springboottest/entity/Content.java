@@ -35,6 +35,9 @@ public class Content {
     /** 封面图 URL */
     private String coverUrl;
 
+    /** 视频嵌入地址（B站 iframe src 或 BV 链接） */
+    private String videoUrl;
+
     /** 正文（详情页用，列表可不展示） */
     private String content;
 
@@ -102,6 +105,14 @@ public class Content {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public String getContent() {

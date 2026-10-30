@@ -31,3 +31,12 @@ export function searchSite(params = {}) {
   sp.set('size', String(size))
   return request(`/api/search?${sp.toString()}`)
 }
+
+/**
+ * 内容详情（含正文 content 与视频地址），供详情弹窗展示
+ * 对应后端 GET /api/content/{id}，需要登录令牌。
+ * @returns ContentDetailVO：{ id, title, category, subCategory, summary, coverUrl, videoUrl, content, author, tags, viewCount, createdAt }
+ */
+export function fetchContentDetail(id) {
+  return request(`/api/content/${id}`)
+}

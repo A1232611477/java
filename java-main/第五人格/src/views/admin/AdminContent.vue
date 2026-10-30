@@ -47,7 +47,10 @@
         <tbody>
           <tr v-for="row in list" :key="row.id">
             <td class="c-id">{{ row.id }}</td>
-            <td class="t-title">{{ row.title }}</td>
+            <td class="t-title">
+              {{ row.title }}
+              <span v-if="row.videoUrl" class="video-tag" title="含视频">🎬</span>
+            </td>
             <td><span class="cat">{{ catLabel(row) }}</span></td>
             <td>
               <span class="badge" :class="row.status === 1 ? 'on' : 'off'">{{ row.status === 1 ? '已发布' : '草稿' }}</span>
@@ -119,6 +122,11 @@
             </div>
           </div>
           <div class="field">
+            <label>视频地址（B站视频，选填）</label>
+            <input v-model="form.videoUrl" class="inp full" placeholder="粘贴 B 站视频地址或 BV 号，如 BV1Rkpn6CES4" />
+            <small class="hint-line">支持完整链接或纯 BV 号；保存后前端会自动转成内嵌播放器。</small>
+          </div>
+          <div class="field">
             <label>标签（逗号分隔）</label>
             <input v-model="form.tags" class="inp full" placeholder="如：监管者,技巧" />
           </div>
@@ -164,7 +172,7 @@ const filters = reactive({ keyword: '', categoryId: null, status: '' })
 const showForm = ref(false)
 const editingId = ref(null)
 const saving = ref(false)
-const form = reactive({ title: '', summary: '', categoryId: null, status: 1, author: '', coverUrl: '', tags: '', content: '' })
+const form = reactive({ title: '', summary: '', categoryId: null, status: 1, author: '', coverUrl: '', videoUrl: '', tags: '', content: '' })
 const errors = reactive({ title: '', categoryId: '' })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)))
@@ -236,7 +244,7 @@ function changePage(p) {
 
 function openCreate() {
   editingId.value = null
-  Object.assign(form, { title: '', summary: '', categoryId: null, status: 1, author: '', coverUrl: '', tags: '', content: '' })
+  Object.assign(form, { title: '', summary: '', categoryId: null, status: 1, author: '', coverUrl: '', videoUrl: '', tags: '', content: '' })
   errors.title = ''
   errors.categoryId = ''
   showForm.value = true
@@ -251,6 +259,7 @@ function openEdit(row) {
     status: row.status === 1 ? 1 : 0,
     author: row.author || '',
     coverUrl: row.coverUrl || '',
+    videoUrl: row.videoUrl || '',
     tags: row.tags || '',
     content: row.content || ''
   })

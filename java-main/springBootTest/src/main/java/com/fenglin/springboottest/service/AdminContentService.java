@@ -75,6 +75,7 @@ public class AdminContentService {
         c.setTitle(form.getTitle());
         c.setSummary(form.getSummary() == null ? "" : form.getSummary());
         c.setCoverUrl(form.getCoverUrl());
+        c.setVideoUrl(form.getVideoUrl());
         c.setContent(form.getContent());
         c.setAuthor(form.getAuthor());
         c.setTags(form.getTags());
@@ -91,6 +92,7 @@ public class AdminContentService {
         if (form.getTitle() != null) existing.setTitle(form.getTitle());
         if (form.getSummary() != null) existing.setSummary(form.getSummary());
         if (form.getCoverUrl() != null) existing.setCoverUrl(form.getCoverUrl());
+        if (form.getVideoUrl() != null) existing.setVideoUrl(form.getVideoUrl());
         if (form.getContent() != null) existing.setContent(form.getContent());
         if (form.getAuthor() != null) existing.setAuthor(form.getAuthor());
         if (form.getTags() != null) existing.setTags(form.getTags());

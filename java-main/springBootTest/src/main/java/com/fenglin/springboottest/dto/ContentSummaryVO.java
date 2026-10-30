@@ -18,6 +18,8 @@ public class ContentSummaryVO {
     private String desc;
     /** 封面图 */
     private String coverUrl;
+    /** 视频嵌入地址（B站 iframe src 或 BV 链接） */
+    private String videoUrl;
     /** 作者 / 来源 */
     private String author;
     /** 标签（逗号分隔） */
@@ -73,6 +75,14 @@ public class ContentSummaryVO {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public String getAuthor() {
