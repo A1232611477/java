@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第五人格 · 1v4 逃脱对决</title>
+<style>
+  :root{
+    --bg:#0d0f1a; --panel:#161a2b; --line:#2a3048;
+    --gold:#c9a86a; --gold2:#e8cf9a;
+    --red:#e05a5a; --green:#5ad0a0; --blue:#6a9fe8;
+    --txt:#e8e6df; --dim:#8b93a8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #1a2038 0%, var(--bg) 60%);
+    color:var(--txt);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;user-select:none;-webkit-user-select:none;
+  }
+  #app{position:relative;width:100%;max-width:1100px;padding:16px}
+
+  /* ===== 顶部标题 ===== */
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .logo{font-size:22px;font-weight:800;letter-spacing:2px;color:var(--gold2)}
+  .logo span{color:var(--dim);font-weight:400;font-size:12px;letter-spacing:1px;margin-left:8px}
+  .score{font-size:14px;color:var(--dim)}
+
+  /* ===== 舞台 ===== */
+  #stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  #game{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #hud{position:absolute;inset:0;pointer-events:none}
+
+  /* ===== 角色选择屏 ===== */
+  #menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:22px;background:rgba(8,10,18,.82);backdrop-filter:blur(6px);
+    z-index:20;padding:24px}
+  #menu h1{font-size:30px;color:var(--gold2);letter-spacing:3px;text-shadow:0 0 24px rgba(201,168,106,.4)}
+  #menu .sub{color:var(--dim);font-size:13px;text-align:center;line-height:1.7}
+  .roles{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .role{width:128px;padding:14px 10px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;cursor:pointer;text-align:center;transition:.18s;position:relative}
+  .role:hover{border-color:var(--gold);transform:translateY(-4px)}
+  .role.sel{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(232,207,154,.5)}
+  .role .avatar{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;
+    background:linear-gradient(135deg,#2a3048,#1a2038);display:flex;align-items:center;justify-content:center;
+    font-size:26px;border:2px solid var(--line)}
+  .role.sel .avatar{border-color:var(--gold2)}
+  .role .name{font-size:15px;font-weight:700;color:var(--gold2)}
+  .role .skill{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
+  .role .tag{position:absolute;top:-8px;right:-6px;font-size:10px;color:#fff;
+    background:var(--red);padding:2px 7px;border-radius:10px}
+  #startBtn{margin-top:4px;padding:12px 48px;font-size:17px;font-weight:700;letter-spacing:3px;
+    color:#1a1208;background:linear-gradient(180deg,var(--gold2),var(--gold));
+    border:none;border-radius:30px;cursor:pointer;transition:.18s}
+  #startBtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,106,.5)}
+  .hint-key{display:inline-block;min-width:18px;padding:1px 6px;background:#222840;border:1px solid var(--line);
+    border-radius:5px;font-size:11px;color:var(--gold2);margin:0 2px}
+
+  /* ===== 结算屏 ===== */
+  #overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;background:rgba(8,10,18,.86);backdrop-filter:blur(6px);z-index:30}
+  #overlay.show{display:flex}
+  #overlay h1{font-size:34px;letter-spacing:4px}
+  #overlay .win{color:var(--green);text-shadow:0 0 30px rgba(90,208,160,.5)}
+  #overlay .lose{color:var(--red);text-shadow:0 0 30px rgba(224,90,90,.5)}
+  #overlay p{color:var(--dim);font-size:14px;text-align:center;line-height:1.8}
+  #overlay button{padding:11px 40px;font-size:16px;font-weight:700;letter-spacing:2px;color:#1a1208;
+    background:linear-gradient(180deg,var(--gold2),var(--gold));border:none;border-radius:30px;cursor:pointer}
+
+  /* ===== 提示 toast ===== */
+  #toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);color:var(--gold2);
+    font-size:15px;letter-spacing:1px;text-shadow:0 2px 8px #000;opacity:0;transition:.3s;pointer-events:none}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="head">
+    <div class="logo">IDENTITY V<span>1v4 逃脱对决 · 演示版</span></div>
+    <div class="score" id="score">求生者 4 · 密码机 0/5</div>
+  </div>
+
+  <div id="stage">
+    <canvas id="game"></canvas>
+    <div id="hud"></div>
+
+    <!-- 角色选择 -->
+    <div id="menu">
+      <h1>第五人格 · 逃脱对决</h1>
+      <div class="sub">
+        选择你的求生者角色，与 3 名 AI 队友协作：<br>
+        修好 <b style="color:var(--gold2)">5 台密码机</b> → 通电逃生门 → <b style="color:var(--green)">成功逃脱</b><br>
+        避开 <b style="color:var(--red)">监管者·杰克</b> 的追击，全员存活即胜利
+      </div>
+      <div class="roles" id="roles"></div>
+      <button id="startBtn">进入庄园</button>
+      <div class="sub" style="font-size:12px">
+        <span class="hint-key">W</span><span class="hint-key">A</span><span class="hint-key">S</span><span class="hint-key">D</span> 移动　
+        <span class="hint-key">空格</span> 使用技能　
+        <span class="hint-key">E</span> 修机 / 开门 / 救人 / 治疗
+      </div>
+    </div>
+
+    <!-- 结算 -->
+    <div id="overlay">
+      <h1 id="resultTitle"></h1>
+      <p id="resultDesc"></p>
+      <button onclick="location.reload()">再来一局</button>
+    </div>
+
+    <div id="toast"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+ * 第五人格 · 1v4 逃脱对决（演示版）
+ * 非对称对抗：1 监管者（AI 杰克）vs 4 求生者（玩家 + 3 AI）
+ * 技能参考角色图鉴：祭司门之钥 / 佣兵冲刺 / 医生治疗 / 空军信号枪 / 先知役鸟
+ * ============================================================ */
+
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+const hud = document.getElementById('hud');
+const toastEl = document.getElementById('toast');
+
+// ---------- 画布尺寸适配 ----------
+let W = 0, H = 0, S = 1; // S: 世界缩放
+function resize(){
+  const stage = document.getElementById('stage');
+  W = stage.clientWidth; H = stage.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+
+// ---------- 世界坐标（逻辑像素） ----------
+const WORLD = { w: 1600, h: 900 };
+
+// ---------- 角色定义 ----------
+const ROLES = [
+  { id:'priestess', name:'祭司',      glyph:'✧',  tag:'位移', hp:2, speed:3.1,
+    skill:'门之钥', skillDesc:'开启连接两地的通道，瞬移至地图另一侧', cd:14, color:'#e8a0d0',
+    useSkill(){ // 传送到一个安全的密码机附近
+      const target = safestMachine(this.x, this.y, 500);
+      if(!target) return false;
+      spawnFx(this.x, this.y, 'flash');
+      this.x = target.x + (Math.random()*80-40);
+      this.y = target.y + (Math.random()*80-40);
+      spawnFx(this.x, this.y, 'portal');
+      toast('祭司发动「门之钥」，穿梭空间！');
+      return true;
+    } },
+  { id:'mercenary', name:'佣兵',      glyph:'⚔',  tag:'救人', hp:2, speed:3.4,
+    skill:'钢铁冲刺', skillDesc:'短时间内大幅加速，快速摆脱追击', cd:12, color:'#e8b060',
+    useSkill(){ // 冲刺加速
+      if(this.boostT > 0) return false;
+      this.boostT = 2.2; this.boostM = 1.9;
+      spawnFx(this.x, this.y, 'dash');
+      toast('佣兵发动「钢铁冲刺」！');
+      return true;
+    } },
+  { id:'doctor', name:'医生',        glyph:'✚',  tag:'治疗', hp:2, speed:3.0,
+    skill:'医术高超', skillDesc:'立即恢复 1 点生命值', cd:20, color:'#e8e0e0',
+    useSkill(){ // 自愈
+      if(this.hp >= this.maxHp) return false;
+      this.hp = Math.min(this.maxHp, this.hp + 1);
+      spawnFx(this.x, this.y, 'heal');
+      toast('医生使用「医术高超」，生命 +1');
+      return true;
+    } },
+  { id:'coordinator', name:'空军',    glyph:'➤',  tag:'控制', hp:2, speed:3.2,
+    skill:'信号枪', skillDesc:'向监管者射击，使其眩晕 3 秒', cd:22, color:'#6ab0e8',
+    useSkill(){ // 眩晕监管者
+      const h = hunter;
+      if(!h || h.stunT > 0 || !inRange(this, h, 520)){ toast('信号枪射程不足'); return false; }
+      h.stunT = 3.0; h.vel.x = h.vel.y = 0;
+      spawnFx(h.x, h.y, 'stun');
+      toast('空军命中信号枪，监管者眩晕！');
+      return true;
+    } },
+  { id:'seer', name:'先知',          glyph:'◉',  tag:'守护', hp:2, speed:3.0,
+    skill:'役鸟', skillDesc:'召唤灵鸟护体，抵挡下一次攻击', cd:18, color:'#a8c8e8',
+    useSkill(){ // 护盾
+      if(this.shieldT > 0) return false;
+      this.shieldT = 6.0;
+      spawnFx(this.x, this.y, 'shield');
+      toast('先知召唤「役鸟」护体！');
+      return true;
+    } },
+];
+
+let selectedRole = 0;
+function renderMenu(){
+  const box = document.getElementById('roles');
+  box.innerHTML = '';
+  ROLES.forEach((r, i) => {
+    const d = document.createElement('div');
+    d.className = 'role' + (i === selectedRole ? ' sel' : '');
+    d.innerHTML = `<div class="avatar">${r.glyph}</div>
+      <div class="name">${r.name}</div>
+      <div class="skill">${r.skill}：${r.skillDesc}</div>
+      <div class="tag">${r.tag}</div>`;
+    d.onclick = () => { selectedRole = i; renderMenu(); };
+    box.appendChild(d);
+  });
+}
+renderMenu();
+document.getElementById('startBtn').onclick = startGame;
+
+// ---------- 地图（墙壁 + 障碍） ----------
+const WALLS = [
+  // 外边界
+  { x:0, y:0, w:WORLD.w, h:18 }, { x:0, y:WORLD.h-18, w:WORLD.w, h:18 },
+  { x:0, y:0, w:18, h:WORLD.h }, { x:WORLD.w-18, y:0, w:18, h:WORLD.h },
+  // 内部障碍（长条墙 / 方块）
+  { x:380, y:150, w:20, h:260 },
+  { x:700, y:420, w:260, h:20 },
+  { x:1180, y:150, w:20, h:260 },
+  { x:500, y:640, w:280, h:20 },
+  { x:1080, y:620, w:20, h:200 },
+  { x:250, y:480, w:20, h:220 },
+  { x:820, y:700, w:160, h:20 },
+  { x:300, y:300, w:140, h:20 },
+  { x:1230, y:440, w:140, h:20 },
+  { x:760, y:180, w:20, h:140 },
+  { x:140, y:220, w:120, h:20 },
+];
+
+// ---------- 密码机 / 逃生门 / 椅子 ----------
+function genMachines(){
+  const m = [];
+  const spots = [
+    [200,100],[800,90],[1400,100],[180,780],[1400,780],
+    [620,300],[980,560],[780,820],[320,560],[1300,320]
+  ];
+  // 取 7 台
+  for(let i=0;i<7;i++){ m.push({ x:spots[i][0], y:spots[i][1], r:26, prog:0, done:false }); }
+  return m;
+}
+const DOORS = [
+  { x:30, y:390, w:18, h:120, open:false, side:'left' },
+  { x:WORLD.w-48, y:390, w:18, h:120, open:false, side:'right' },
+];
+const CHAIRS = [
+  { x:400, y:80 }, { x:1180, y:80 }, { x:400, y:820 }, { x:1180, y:820 },
+];
+
+// ---------- 游戏状态 ----------
+let game = null;
+let raf = 0;
+
+function startGame(){
+  const role = ROLES[selectedRole];
+  const machines = genMachines();
+  DOORS.forEach(d => d.open = false);
+
+  // 玩家 + AI 队友（共 4 求生者，玩家永远是最先那个）
+  const spawns = [[150,470],[1450,470],[150,150],[1450,150]];
+  const team = [
+    makeSurvivor(role, spawns[0], true),
+    makeSurvivor(ROLES[1], spawns[1], false), // 佣兵
+    makeSurvivor(ROLES[2], spawns[2], false), // 医生
+    makeSurvivor(ROLES[4], spawns[3], false), // 先知
+  ];
+
+  game = {
+    role, machines, team,
+    hunter: makeHunter(),
+    over: false, result: null,
+    time: 0, elapsed: 0,
+    survivorsAlive: 4, escaped: 0,
+    keys: {},
+  };
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('overlay').classList.remove('show');
+  if(raf) cancelAnimationFrame(raf);
+  resize();
+  loop();
+}
+
+function makeSurvivor(role, pos, isPlayer){
+  return {
+    ...role,
+    x:pos[0], y:pos[1], r:15,
+    hp:role.hp, maxHp:role.hp,
+    vel:{x:0,y:0},
+    isPlayer, alive:true, escaped:false,
+    chaired:false, chairT:0, chairMax:0, chair:null,
+    boostT:0, boostM:1, shieldT:0,
+    cdT:0, // 技能冷却剩余
+    target:null, // AI 目标（修机等）
+    wanderT:0, fleeT:0,
+    // 治疗
+    healing:false, healT:0, healTarget:null,
+  };
+}
+function makeHunter(){
+  return {
+    name:'杰克', glyph:'🖤', x:800, y:450, r:20,
+    hp:1, speed:3.5, vel:{x:0,y:0},
+    stunT:0, attackCd:0, // 攻击冷却
+    carrying:null, // 抱起的求生者
+    fogCd:0, // 雾刃冷却
+    target:null,
+    wanderT:0,
+  };
+}
+
+// ---------- 输入 ----------
+window.addEventListener('keydown', e => {
+  if(!game) return;
+  game.keys[e.code] = true;
+  if(e.code === 'Space'){
+    e.preventDefault();
+    if(game.over) return;
+    const p = game.team[0];
+    if(p.alive && !p.escaped && !p.chaired){
+      if(p.cdT <= 0){
+        if(p.useSkill()) p.cdT = p.cd;
+      } else {
+        toast(`技能冷却中：${Math.ceil(p.cdT)}s`);
+      }
+    }
+  }
+  if(e.code === 'KeyE'){
+    if(game.over) return;
+    interact();
+  }
+});
+window.addEventListener('keyup', e => { if(game) game.keys[e.code] = false; });
+
+// ---------- 交互 ----------
+function interact(){
+  const p = game.team[0];
+  if(!p.alive || p.escaped || p.chaired) return;
+
+  // 1) 修机
+  for(const m of game.machines){
+    if(!m.done && dist(p, m) < m.r + 20){
+      const gain = p.boostT > 0 ? 0.6 : 0.4; // 冲刺中修机效率更高（简化）
+      m.prog += gain;
+      if(m.prog >= 100){ m.prog = 100; m.done = true;
+        spawnFx(m.x, m.y, 'spark');
+        toast('密码机已点亮！');
+        checkPower();
+      }
+      return;
+    }
+  }
+  // 2) 开门
+  for(const d of DOORS){
+    if(d.open && Math.abs(p.y - (d.y + d.h/2)) < d.h/2 + 30 && Math.abs(p.x - (d.x + d.w/2)) < 60){
+      if(powerOn() === false) { toast('逃生门尚未通电'); return; }
+      p.escaped = true; game.escaped++;
+      spawnFx(p.x, p.y, 'escape');
+      toast('成功逃脱！');
+      checkEnd();
+      return;
+    }
+  }
+  // 3) 救人（队友被挂椅）
+  for(const s of game.team){
+    if(s !== p && s.chaired && dist(p, s.chair) < 40){
+      s.chaired = false; s.hp = 1; s.chairT = 0; s.chair = null;
+      toast('成功救下队友！');
+      return;
+    }
+  }
+  // 4) 治疗倒地队友
+  for(const s of game.team){
+    if(s !== p && s.alive && !s.escaped && s.hp <= 0 && !s.chaired && dist(p, s) < 40){
+      s.hp = 1;
+      spawnFx(s.x, s.y, 'heal');
+      toast('扶起倒地队友！');
+      return;
+    }
+  }
+}
+
+function powerOn(){
+  return game.machines.filter(m => m.done).length >= 5;
+}
+function checkPower(){
+  if(powerOn()){
+    DOORS.forEach(d => d.open = true);
+    toast('逃生门已通电！快逃！');
+  }
+}
+
+// ---------- 辅助 ----------
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function inRange(a,b,r){ return dist(a,b) < r; }
+
+function safestMachine(x, y, minD){
+  // 离监管者远、且离自身较近的未完成密码机
+  let best = null, score = -1;
+  for(const m of game.machines){
+    if(m.done) continue;
+    const dh = dist(game.hunter, m);
+    const dp = Math.hypot(m.x-x, m.y-y);
+    const s = dh - dp * 0.4;
+    if(s > score){ score = s; best = m; }
+  }
+  return best;
+}
+
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>toastEl.classList.remove('show'), 2200);
+}
+
+// ---------- 特效 ----------
+const FX = [];
+function spawnFx(x,y,type){ FX.push({ x, y, type, t:0, life: type==='portal'?0.9:0.5 }); }
+
+// ---------- 主循环 ----------
+let lastT = performance.now();
+function loop(){
+  const now = performance.now();
+  const dt = Math.min((now - lastT)/1000, 0.05);
+  lastT = now;
+  if(game && !game.over){
+    update(dt);
+    game.elapsed += dt;
+  }
+  render();
+  raf = requestAnimationFrame(loop);
+}
+
+function update(dt){
+  const g = game;
+  g.time += dt;
+  const p = g.team[0];
+  const h = g.hunter;
+
+  // 更新玩家
+  updateSurvivorPlayer(p, dt);
+  // 更新 AI 队友
+  for(let i=1;i<g.team.length;i++) updateSurvivorAI(g.team[i], dt);
+  // 更新监管者
+  updateHunter(h, dt);
+
+  // 技能冷却 & 状态计时
+  g.team.forEach(s => {
+    if(s.cdT > 0) s.cdT -= dt;
+    if(s.boostT > 0) s.boostT -= dt;
+    if(s.shieldT > 0) s.shieldT -= dt;
+    if(s.chaired){
+      s.chairT += dt;
+      if(s.chairT >= s.chairMax){ s.alive = false; s.chaired = false; g.survivorsAlive--; spawnFx(s.chair.x, s.chair.y, 'eliminate'); toast(s.name+' 被淘汰'); }
+    }
+  });
+  if(h.attackCd > 0) h.attackCd -= dt;
+  if(h.fogCd > 0) h.fogCd -= dt;
+  if(h.stunT > 0) h.stunT -= dt;
+
+  // 特效更新
+  for(let i=FX.length-1;i>=0;i--){ FX[i].t += dt; if(FX[i].t > FX[i].life) FX.splice(i,1); }
+
+  checkEnd();
+}
+
+// ---------- 玩家控制 ----------
+function updateSurvivorPlayer(s, dt){
+  if(!s.alive || s.escaped || s.chaired || s.hp <= 0) return;
+  const k = game.keys;
+  let dx=0, dy=0;
+  if(k['KeyW']||k['ArrowUp']) dy-=1;
+  if(k['KeyS']||k['ArrowDown']) dy+=1;
+  if(k['KeyA']||k['ArrowLeft']) dx-=1;
+  if(k['KeyD']||k['ArrowRight']) dx+=1;
+  if(dx||dy){
+    const l = Math.hypot(dx,dy); dx/=l; dy/=l;
+    const spd = s.speed * (s.boostT>0 ? s.boostM : 1);
+    s.x += dx*spd; s.y += dy*spd;
+  }
+  s.vel.x = dx; s.vel.y = dy;
+  collideWorld(s);
+}
+
+// ---------- AI 求生者 ----------
+function updateSurvivorAI(s, dt){
+  if(!s.alive || s.escaped || s.chaired || s.hp <= 0) return;
+  const h = game.hunter;
+  const dh = dist(s, h);
+
+  // 救援：优先去救挂椅/倒地的队友（监管者不在附近时）
+  const needy = game.team.find(t => t !== s && t.alive && !t.escaped && (t.chaired || t.hp <= 0));
+  if(needy && dist(h, needy) > 200){
+    const tx = needy.chaired ? needy.chair.x : needy.x;
+    const ty = needy.chaired ? needy.chair.y : needy.y;
+    if(dist(s, {x:tx,y:ty}) < 40){
+      if(needy.chaired){ needy.chaired=false; needy.hp=1; needy.chairT=0; needy.chair=null; toast(s.name+' 救下了 '+needy.name); }
+      else if(needy.hp<=0){ needy.hp=1; spawnFx(needy.x,needy.y,'heal'); toast(s.name+' 扶起了 '+needy.name); }
+      return;
+    }
+    moveToward(s, {x:tx,y:ty}, dt);
+    return;
+  }
+
+  // 恐惧：监管者靠近 → 逃跑
+  if(h.stunT <= 0 && dh < 160){
+    fleeFrom(s, h, dt);
+    return;
+  }
+  // 如果被追击过，短暂逃离
+  if(s.fleeT > 0){
+    s.fleeT -= dt;
+    fleeFrom(s, h, dt);
+    return;
+  }
+
+  // 找一台未完成密码机去修
+  if(!s.target || s.target.done){
+    s.target = null;
+    for(const m of game.machines){ if(!m.done){ s.target = m; break; } }
+    // 若已通电且无目标，去开门
+    if(!s.target && powerOn()){
+      const d = DOORS[Math.random()<0.5?0:1];
+      s.target = { x:d.x+d.w/2, y:d.y+d.h/2, done:false, door:true };
+    }
+  }
+  if(s.target){
+    if(s.target.door){
+      // 到达门口则逃脱
+      if(dist(s, s.target) < 50){ s.escaped = true; game.escaped++; spawnFx(s.x,s.y,'escape'); toast(s.name+' 已逃脱'); checkEnd(); }
+      else moveToward(s, s.target, dt);
+    } else {
+      if(dist(s, s.target) < s.target.r + 18){
+        s.target.prog += 0.5 * dt * 3; // AI 修机略慢
+        if(s.target.prog >= 100){ s.target.prog=100; s.target.done=true; spawnFx(s.target.x,s.target.y,'spark'); checkPower(); s.target=null; }
+      } else moveToward(s, s.target, dt);
+    }
+  } else {
+    // 无目标，轻微游走
+    s.wanderT -= dt;
+    if(s.wanderT <= 0){ s.wanderT = 2; s.wx = Math.random()*WORLD.w; s.wy = Math.random()*WORLD.h; }
+    moveToward(s, {x:s.wx,y:s.wy}, dt);
+  }
+}
+
+function fleeFrom(s, h, dt){
+  const ang = Math.atan2(s.y-h.y, s.x-h.x);
+  s.x += Math.cos(ang)*s.speed*1.1;
+  s.y += Math.sin(ang)*s.speed*1.1;
+  s.fleeT = 0.6;
+  collideWorld(s);
+}
+function moveToward(s, t, dt){
+  const ang = Math.atan2(t.y-s.y, t.x-s.x);
+  s.x += Math.cos(ang)*s.speed*0.9;
+  s.y += Math.sin(ang)*s.speed*0.9;
+  collideWorld(s);
+}
+
+function collideWorld(o){
+  // 与世界边界
+  o.x = Math.max(20, Math.min(WORLD.w-20, o.x));
+  o.y = Math.max(20, Math.min(WORLD.h-20, o.y));
+  // 与墙壁（简单圆-矩形碰撞）
+  for(const w of WALLS){
+    const cx = Math.max(w.x, Math.min(o.x, w.x+w.w));
+    const cy = Math.max(w.y, Math.min(o.y, w.y+w.h));
+    const d = Math.hypot(o.x-cx, o.y-cy);
+    if(d < o.r){
+      const ang = Math.atan2(o.y-cy, o.x-cx);
+      o.x = cx + Math.cos(ang)*o.r;
+      o.y = cy + Math.sin(ang)*o.r;
+    }
+  }
+}
+
+// ---------- 监管者 AI ----------
+function updateHunter(h, dt){
+  // 眩晕
+  if(h.stunT > 0){ return; }
+  // 抱着人 → 走向最近的椅子
+  if(h.carrying){
+    let c = nearestChair(h);
+    if(c){
+      if(dist(h, c) < 30){
+        const s = h.carrying;
+        s.chaired = true; s.chair = c; s.chairMax = 30; s.chairT = 0; s.hp = 1;
+        h.carrying = null;
+        toast(s.name + ' 被挂上狂欢之椅！');
+      } else moveToward(h, c, dt);
+    }
+    return;
+  }
+
+  // 找目标：优先最近的可行动求生者
+  let best = null, bd = 1e9;
+  for(const s of game.team){
+    if(!s.alive || s.escaped || s.chaired) continue;
+    const d = dist(h, s);
+    if(d < bd){ bd = d; best = s; }
+  }
+  if(!best) return;
+  h.target = best;
+
+  // 雾刃：距离适中且有冷却 → 远程攻击
+  if(h.fogCd <= 0 && bd > 90 && bd < 420){
+    h.fogCd = 6;
+    // 命中判定：直线，简单处理为距离内直接命中
+    if(Math.abs(h.target.y - h.y) < 60 || Math.abs(h.target.x - h.x) < 60){
+      hitSurvivor(h.target, h);
+    } else {
+      spawnFx(h.target.x, h.target.y, 'fog');
+      toast('杰克释放「雾刃」，被躲开了！');
+    }
+    return;
+  }
+
+  // 普通追击
+  moveToward(h, best, dt);
+
+  // 近身攻击
+  if(h.attackCd <= 0 && bd < 34){
+    h.attackCd = 1.4;
+    hitSurvivor(best, h);
+  }
+}
+
+function hitSurvivor(s, h){
+  // 役鸟护盾挡一次
+  if(s.shieldT > 0){
+    s.shieldT = 0;
+    spawnFx(s.x, s.y, 'shield');
+    toast('役鸟挡住了攻击！');
+    return;
+  }
+  s.hp -= 1;
+  spawnFx(s.x, s.y, 'hit');
+  if(s.hp <= 0){
+    // 倒地：监管者抱起
+    h.carrying = s;
+    s.hp = 0;
+    toast(s.name + ' 被击倒！');
+    if(s.isPlayer){ toast('你被击倒了，等待队友救援…'); }
+  } else {
+    if(s.isPlayer) toast('你受伤了！');
+  }
+}
+
+function nearestChair(h){
+  let b=null, bd=1e9;
+  for(const c of CHAIRS){ const d=dist(h,c); if(d<bd){bd=d;b=c;} }
+  return b;
+}
+
+// ---------- 胜负判定 ----------
+function checkEnd(){
+  const g = game;
+  if(g.over) return;
+  // 求生者胜利：玩家逃脱，或至少 3 人逃脱
+  if(g.team[0].escaped || g.escaped >= 3){
+    endGame(true);
+    return;
+  }
+  // 监管者胜利：所有求生者都无法再逃脱（已淘汰 + 已被挂椅 + 已倒地正在被抱）
+  const active = g.team.filter(s => s.alive && !s.escaped).length;
+  if(active === 0){
+    endGame(false);
+  }
+}
+
+function endGame(win){
+  game.over = true;
+  const o = document.getElementById('overlay');
+  const t = document.getElementById('resultTitle');
+  const d = document.getElementById('resultDesc');
+  t.textContent = win ? '成功逃脱！' : '全军覆没…';
+  t.className = win ? 'win' : 'lose';
+  d.innerHTML = win
+    ? `求生者阵营获胜！共 ${game.escaped} 人逃脱，用时 ${Math.floor(game.elapsed)} 秒`
+    : `监管者·杰克 获胜。求生者全部被淘汰`;
+  o.classList.add('show');
+}
+
+// ---------- 渲染 ----------
+function render(){
+  ctx.clearRect(0,0,W,H);
+  if(!game){ return; }
+  const sx = W/WORLD.w, sy = H/WORLD.h;
+  S = Math.min(sx, sy);
+  const ox = (W - WORLD.w*S)/2, oy = (H - WORLD.h*S)/2;
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.scale(S, S);
+
+  // 地面
+  ctx.fillStyle = '#141824';
+  ctx.fillRect(0,0,WORLD.w,WORLD.h);
+  drawGrid();
+  drawWalls();
+  drawDoors();
+  drawChairs();
+  drawMachines();
+
+  // 求生者
+  game.team.forEach(s => drawSurvivor(s));
+  drawHunter(game.hunter);
+
+  // 特效
+  drawFx();
+
+  ctx.restore();
+
+  drawHUD();
+}
+
+function drawGrid(){
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for(let x=0;x<=WORLD.w;x+=100){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WORLD.h); ctx.stroke(); }
+  for(let y=0;y<=WORLD.h;y+=100){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(WORLD.w,y); ctx.stroke(); }
+}
+
+function drawWalls(){
+  ctx.fillStyle = '#2a3048';
+  ctx.strokeStyle = '#3a4260';
+  ctx.lineWidth = 2;
+  for(const w of WALLS){
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+    ctx.strokeRect(w.x, w.y, w.w, w.h);
+  }
+}
+
+function drawMachines(){
+  for(const m of game.machines){
+    ctx.save();
+    ctx.translate(m.x, m.y);
+    // 底座
+    ctx.fillStyle = '#1c2233';
+    ctx.beginPath(); ctx.arc(0,0,m.r,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = m.done ? '#e8cf9a' : '#5a6a90';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // 密码机图标
+    ctx.fillStyle = m.done ? '#e8cf9a' : '#8b93a8';
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(m.done ? '✓' : '⌨', 0, 1);
+    // 进度环
+    if(!m.done && m.prog > 0){
+      ctx.strokeStyle = '#e8cf9a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0,0,m.r+5,-Math.PI/2, -Math.PI/2 + Math.PI*2*(m.prog/100));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function drawDoors(){
+  for(const d of DOORS){
+    ctx.fillStyle = d.open ? '#3f8f5f' : '#5a3040';
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.strokeStyle = d.open ? '#6ad0a0' : '#8a5060';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(d.x, d.y, d.w, d.h);
+    ctx.fillStyle = d.open ? '#bfffe0' : '#e0a0b0';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.translate(d.x + d.w/2, d.y + d.h/2);
+    ctx.rotate(Math.PI/2);
+    ctx.fillText(d.open ? '出口开启' : '未通电', 0, 0);
+    ctx.restore();
+  }
+}
+
+function drawChairs(){
+  for(const c of CHAIRS){
+    ctx.fillStyle = '#3a2030';
+    ctx.strokeStyle = '#6a4050';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(c.x, c.y, 16, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#c08aa0';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('椅', c.x, c.y);
+  }
+}
+
+function drawSurvivor(s){
+  if(!s.alive && !s.chaired) return;
+  ctx.save();
+  ctx.translate(s.x, s.y);
+
+  // 倒地/挂椅淡化
+  if(s.hp <= 0 && !s.chaired){ ctx.globalAlpha = 0.55; }
+
+  // 选中/玩家高亮
+  if(s.isPlayer){
+    ctx.shadowColor = '#e8cf9a'; ctx.shadowBlur = 14;
+  }
+  // 身体
+  ctx.fillStyle = s.color;
+  ctx.beginPath(); ctx.arc(0,0,s.r,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = s.isPlayer ? '#fff' : 'rgba(0,0,0,0.4)';
+  ctx.lineWidth = s.isPlayer ? 2.5 : 1.5;
+  ctx.stroke();
+
+  // 头像字
+  ctx.fillStyle = '#1a1208';
+  ctx.font = 'bold 15px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(s.glyph, 0, 0.5);
+
+  // 血条
+  const bw = 30;
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(-bw/2, -s.r-12, bw, 5);
+  ctx.fillStyle = s.hp>=2 ? '#5ad0a0' : (s.hp>=1 ? '#e0c060' : '#e05a5a');
+  ctx.fillRect(-bw/2, -s.r-12, bw*(s.hp/s.maxHp), 5);
+
+  // 护盾环
+  if(s.shieldT > 0){
+    ctx.strokeStyle = '#a8c8e8'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(0,0,s.r+6,0,Math.PI*2); ctx.stroke();
+  }
+  // 冲刺特效
+  if(s.boostT > 0){
+    ctx.strokeStyle = '#e8b060'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(0,0,s.r+10,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // 名字
+  if(s.isPlayer){
+    ctx.fillStyle = '#fff'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(s.name + '（你）', s.x, s.y - s.r - 20);
+  }
+}
+
+function drawHunter(h){
+  ctx.save();
+  ctx.translate(h.x, h.y);
+  if(h.stunT > 0){
+    ctx.strokeStyle = '#ffd060'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(0,0,h.r+6,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle = '#ffe090';
+    ctx.font='16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('✦', 0, -h.r-12);
+  }
+  // 身体
+  ctx.fillStyle = '#3a1a2a';
+  ctx.beginPath(); ctx.arc(0,0,h.r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#e05a5a'; ctx.lineWidth=3;
+  ctx.stroke();
+  ctx.fillStyle = '#ffd0d0';
+  ctx.font='bold 18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(h.glyph, 0, 0.5);
+  ctx.restore();
+
+  // 名字
+  ctx.fillStyle = '#e05a5a'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('监管者 · 杰克', h.x, h.y - h.r - 14);
+
+  // 抱着的求生者
+  if(h.carrying){
+    ctx.save();
+    ctx.translate(h.x, h.y - h.r - 18);
+    ctx.fillStyle = h.carrying.color;
+    ctx.beginPath(); ctx.arc(0,0,12,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawFx(){
+  for(const f of FX){
+    const a = 1 - f.t/f.life;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.translate(f.x, f.y);
+    if(f.type==='hit'){
+      ctx.strokeStyle='#e05a5a'; ctx.lineWidth=3;
+      const r = 10 + f.t*40;
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke();
+    } else if(f.type==='heal' || f.type==='shield'){
+      ctx.strokeStyle='#5ad0a0'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,12+f.t*20,0,Math.PI*2); ctx.stroke();
+    } else if(f.type==='spark'){
+      ctx.fillStyle='#e8cf9a';
+      ctx.beginPath(); ctx.arc(0,0,8+f.t*30,0,Math.PI*2); ctx.fill();
+    } else if(f.type==='portal'){
+      ctx.strokeStyle='#e8a0d0'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,14+f.t*30,0,Math.PI*2); ctx.stroke();
+    } else if(f.type==='dash' || f.type==='stun' || f.type==='fog'){
+      ctx.strokeStyle='#e8b060'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,10+f.t*25,0,Math.PI*2); ctx.stroke();
+    } else if(f.type==='escape'){
+      ctx.fillStyle='#6ad0a0';
+      ctx.beginPath(); ctx.arc(0,0,10+f.t*30,0,Math.PI*2); ctx.fill();
+    } else if(f.type==='eliminate'){
+      ctx.fillStyle='#e05a5a';
+      ctx.beginPath(); ctx.arc(0,0,12+f.t*30,0,Math.PI*2); ctx.fill();
+    } else if(f.type==='flash'){
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(0,0,16+f.t*10,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function drawHUD(){
+  // 顶部状态条
+  const done = game.machines.filter(m=>m.done).length;
+  const alive = game.team.filter(s=>s.alive && !s.escaped).length;
+  const total = game.team.length;
+  document.getElementById('score').textContent =
+    `求生者 ${alive}/${total} · 逃脱 ${game.escaped} · 密码机 ${done}/5`;
+
+  // 底部技能栏（玩家）
+  const p = game.team[0];
+  if(p && p.alive && !p.escaped){
+    const bar = document.createElement('div');
+    bar.style.cssText = `position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+      display:flex;gap:10px;align-items:center;background:rgba(10,12,22,.8);
+      padding:8px 16px;border-radius:12px;border:1px solid #2a3048`;
+    bar.id = 'skillbar';
+    const old = document.getElementById('skillbar');
+    if(old) old.remove();
+    bar.innerHTML = `
+      <div style="color:#e8cf9a;font-weight:700">${p.name}</div>
+      <div style="color:#8b93a8;font-size:12px">
+        【${p.skill}】${p.cdT>0 ? '冷却 '+Math.ceil(p.cdT)+'s' : '就绪（空格）'} · E 交互
+      </div>`;
+    hud.appendChild(bar);
+  } else {
+    const old = document.getElementById('skillbar');
+    if(old) old.remove();
+  }
+}
+
+// 启动：先渲染空场景
+resize();
+render();
+</script>
+</body>
+</html>
