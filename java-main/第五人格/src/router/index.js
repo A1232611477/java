@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Home from '../views/Home.vue'
+import Shop from '../views/Shop.vue'
+import Community from '../views/Community.vue'
 import AdminLogin from '../views/AdminLogin.vue'
 import AdminLayout from '../views/admin/AdminLayout.vue'
 import AdminContent from '../views/admin/AdminContent.vue'
@@ -13,6 +15,8 @@ const routes = [
   { path: '/login', name: 'login', component: Login, meta: { guestOnly: true } },
   { path: '/register', name: 'register', component: Register, meta: { guestOnly: true } },
   { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
+  { path: '/shop', name: 'shop', component: Shop, meta: { requiresAuth: true } },
+  { path: '/community', name: 'community', component: Community, meta: { requiresAuth: true } },
 
   // ============ 后台管理系统 ============
   // 仅登录页（无注册入口）；其余接口需管理员令牌

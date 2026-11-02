@@ -177,6 +177,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import NightSky from '../components/NightSky.vue'
 import { useAuth } from '../stores/auth'
@@ -186,6 +187,7 @@ import { fetchHome, searchSite, fetchContentDetail } from '../api/search'
 
 const { show } = useToast()
 const { user } = useAuth()
+const router = useRouter()
 
 // 首页数据（来自后端 /api/home）
 const categories = ref([])   // 一级分类（含 children 二级）
@@ -237,7 +239,7 @@ async function onSearch(q) {
   query.value = kw
   searched.value = true
   try {
-    const res = await searchSite({ q: kw })
+    const res = await searchSite({ q: kw, size: 200 })
     results.value = res.list || []
     total.value = res.total || 0
     if (!results.value.length) show(`没有找到与“${kw}”相关的内容`)
@@ -252,11 +254,21 @@ function categoryIdByName(name) {
 }
 
 async function onSearchCategory(name) {
+  if (name === '周边商城') {
+    router.push({ name: 'shop' })
+    return
+  }
+  if (name === '玩家社区') {
+    router.push({ name: 'community' })
+    return
+  }
   const id = categoryIdByName(name)
   query.value = name
   searched.value = true
   try {
-    const res = await searchSite({ categoryId: id })
+    // 按分类浏览时拉取足够多的内容（角色图鉴等分类数据量已超默认 10 条），
+    // 一次性展示全部，避免后续分页数据不显示。
+    const res = await searchSite({ categoryId: id, size: 200 })
     results.value = res.list || []
     total.value = res.total || 0
   } catch (e) {

@@ -132,6 +132,14 @@ function doSearch() {
 
 function onNav(item) {
   menuOpen.value = false
+  if (item === '周边商城') {
+    router.push({ name: 'shop' })
+    return
+  }
+  if (item === '玩家社区') {
+    router.push({ name: 'community' })
+    return
+  }
   emit('navigate', item)
 }
 
