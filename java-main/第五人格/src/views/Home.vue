@@ -103,15 +103,48 @@
         <p v-else class="empty">未找到与「{{ query }}」相关的内容，换个关键词试试。</p>
       </section>
 
-      <!-- 精选内容（来自后端首页接口） -->
+      <!-- 精选内容（来自后端首页接口，含视频） -->
       <section class="section">
         <div class="section-head">
           <h2 class="section-title">门户精选</h2>
           <p class="section-sub">从角色图鉴到赛事战报，一站浏览最新内容</p>
         </div>
-        <div class="grid">
+
+        <!-- 精选视频：2 列视频卡片（内嵌 B 站播放器） -->
+        <div v-if="featuredVideos.length" class="video-grid">
+          <article
+            v-for="f in featuredVideos"
+            :key="f.id"
+            class="video-card"
+            @click="openFeatured(f)"
+          >
+            <div class="video-player">
+              <iframe
+                :src="toEmbed(f.videoUrl)"
+                scrolling="no"
+                border="0"
+                frameborder="no"
+                framespacing="0"
+                allowfullscreen="true"
+                loading="lazy"
+              ></iframe>
+            </div>
+            <div class="video-info">
+              <h3 class="video-title" :title="f.title">{{ f.title }}</h3>
+              <p class="video-desc">{{ f.desc }}</p>
+              <div class="video-meta">
+                <span class="video-cat">{{ f.subCategory || f.category }}</span>
+                <span class="video-author">{{ f.author || '官方' }}</span>
+                <span class="video-views">▶ {{ f.viewCount || 0 }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- 精选图文：3 列图标卡片 -->
+        <div v-if="featuredArticles.length" class="grid">
           <div
-            v-for="f in featured"
+            v-for="f in featuredArticles"
             :key="f.id"
             class="card feature"
             @click="onSearchCategory(f.category)"
@@ -121,8 +154,9 @@
             <p class="f-desc">{{ f.desc }}</p>
             <span class="f-go">{{ f.subCategory || f.category }} →</span>
           </div>
-          <p v-if="!featured.length" class="empty">精选内容加载中…</p>
         </div>
+
+        <p v-if="!featured.length" class="empty">精选内容加载中…</p>
       </section>
     </main>
 
@@ -192,6 +226,10 @@ const router = useRouter()
 // 首页数据（来自后端 /api/home）
 const categories = ref([])   // 一级分类（含 children 二级）
 const featured = ref([])     // 精选内容
+
+// 精选内容拆分：带视频的用视频卡片，其余用图文卡片
+const featuredVideos = computed(() => featured.value.filter((f) => f.videoUrl))
+const featuredArticles = computed(() => featured.value.filter((f) => !f.videoUrl))
 
 // 搜索状态
 const query = ref('')
@@ -282,6 +320,12 @@ function onChip(c) {
 
 // 打开攻略详情弹窗
 async function openGuide(r) {
+  detailKind.value = 'guide'
+  await openDetail(r)
+}
+
+// 点击门户精选的视频卡片，打开详情弹窗（含视频播放）
+async function openFeatured(r) {
   detailKind.value = 'guide'
   await openDetail(r)
 }

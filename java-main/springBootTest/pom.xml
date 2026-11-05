@@ -50,6 +50,12 @@
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
+		<!-- WebSocket：小游戏「好友联机」实时同步 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<!-- MyBatis-Plus (Spring Boot 3) -->
 		<dependency>
 			<groupId>com.baomidou</groupId>

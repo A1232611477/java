@@ -344,6 +344,22 @@ INSERT IGNORE INTO `t_content`
 (87, 21, 5, '【攻略】新手必看：如何高效遛鬼', '从零开始的牵制入门，教你拖出宝贵的修机时间。', '老玩家-阿凯', '攻略,新手,牵制', 1, 1890, '2026-10-27 10:00:00'),
 (88, 21, 5, '【攻略】监管者视角：杰克雾刃预判心得', '监管者玩家分享雾刃命中与追击节奏技巧。', '监管者-夜枭', '攻略,杰克,监管者', 1, 870, '2026-10-27 10:00:00');
 
+-- 7.6 赛事中心 · 2026 IVL 秋季赛（B 站官方「第五人格赛事」账号合集真实视频，status=1 已发布）。
+--     5 场完整比赛回放 + 5 期每周 TOP10 + 1 个宣传片。INSERT IGNORE 保证可重复执行。
+INSERT IGNORE INTO `t_content`
+  (`id`, `category_id`, `top_category_id`, `title`, `summary`, `cover_url`, `video_url`, `author`, `tags`, `status`, `view_count`, `created_at`) VALUES
+(90, 16, 4, '【2026IVL秋季赛】宣传片', '2026IVL秋季赛官方宣传片，沉潜克刚，暗林逐光，十支战队再度集结。', NULL, '//player.bilibili.com/player.html?bvid=BV1Boa16CEJ1&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,宣传片', 1, 5200, '2026-10-01 12:00:00'),
+(91, 16, 4, '【2026IVL秋季赛】常规赛week1 TOP10', '秋季赛常规赛第一周十佳操作集锦，开赛首周名场面大盘点。', NULL, '//player.bilibili.com/player.html?bvid=BV13dHD6WE6n&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,TOP10', 1, 4300, '2026-10-09 12:00:00'),
+(92, 16, 4, '【2026IVL秋季赛】 Week3 Day1 GR vs DOU5', '秋季赛常规赛第三周第一日完整回放，GR 对阵 DOU5 双方鏖战至加赛。', NULL, '//player.bilibili.com/player.html?bvid=BV1tSJX6EEiQ&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,完整回放', 1, 2680, '2026-10-22 12:00:00'),
+(93, 16, 4, '【2026IVL秋季赛】常规赛week2 TOP10', '秋季赛常规赛第二周十佳操作集锦，牙医、女王蜂等新角色大放异彩。', NULL, '//player.bilibili.com/player.html?bvid=BV1Q1Ja68EBf&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,TOP10', 1, 3890, '2026-10-16 12:00:00'),
+(94, 16, 4, '【2026IVL秋季赛】 Week4 Day1 TE vs DOU5', '秋季赛常规赛第四周第一日完整回放，TE 对阵 DOU5，DOU5 双三抓强势领跑。', NULL, '//player.bilibili.com/player.html?bvid=BV1ppnb6kEk6&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,完整回放', 1, 2450, '2026-10-23 12:00:00'),
+(95, 16, 4, '【2026IVL秋季赛】 Week4 Day1 GR vs ACT', '秋季赛常规赛第四周第一日完整回放，GR 对阵 ACT 两支强队你来我往。', NULL, '//player.bilibili.com/player.html?bvid=BV12Jnh6pEBp&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,完整回放', 1, 2310, '2026-10-23 14:00:00'),
+(96, 16, 4, '【2026IVL秋季赛】常规赛week3 TOP10', '秋季赛常规赛第三周十佳操作集锦，监管者屡现奇招，求生者操作拉满。', NULL, '//player.bilibili.com/player.html?bvid=BV1d3nv65EAn&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,TOP10', 1, 3560, '2026-10-23 18:00:00'),
+(97, 16, 4, '【2026IVL秋季赛】 Week4 Day2 成都GG vs GR', '秋季赛常规赛第四周第二日完整回放，榜首成都GG 对阵 GR 的强强对话。', NULL, '//player.bilibili.com/player.html?bvid=BV19aHK6cEKV&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,完整回放', 1, 2740, '2026-10-24 12:00:00'),
+(98, 16, 4, '【2026IVL秋季赛】常规赛week4 TOP10', '秋季赛常规赛第四周十佳操作集锦，破轮四抓、野人撞救等名场面。', NULL, '//player.bilibili.com/player.html?bvid=BV1NqxL6WEz9&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,TOP10', 1, 3120, '2026-10-29 12:00:00'),
+(99, 16, 4, '【2026IVL秋季赛】 Week5 Day3 GR vs MRC', '秋季赛常规赛第五周第三日完整回放，GR 对阵 MRC，MRC 求生者阵营状态出色。', NULL, '//player.bilibili.com/player.html?bvid=BV17axx6qENo&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,完整回放', 1, 2180, '2026-10-31 12:00:00'),
+(100, 16, 4, '【2026IVL秋季赛】常规赛week5 TOP10', '秋季赛常规赛第五周十佳操作集锦，秋季赛第五周名场面大盘点。', NULL, '//player.bilibili.com/player.html?bvid=BV1GrxZ6QEHt&autoplay=0', '第五人格赛事', '赛事,IVL,秋季赛,TOP10', 1, 2960, '2026-11-02 12:00:00');
+
 -- ============================================================================
 -- 附：仅当数据库表是「旧版（含 phone 字段）」时，才需要执行下面的升级语句，
 --     用于移除手机号字段与唯一索引（注册不再需要手机号与短信验证码）。

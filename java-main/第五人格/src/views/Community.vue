@@ -17,7 +17,7 @@
     <section class="game-section">
       <div class="game-head">
         <h2 class="game-title">🕹 逃脱对决 · 1v4</h2>
-        <p class="game-sub">1 名监管者 vs 4 名求生者的非对称逃脱游戏 · 技能参考角色图鉴</p>
+        <p class="game-sub">1 名监管者 vs 4 名求生者的非对称逃脱游戏 · 支持好友联机 · 技能参考角色图鉴</p>
         <button class="game-full" @click="fullscreen">⛶ 全屏</button>
       </div>
       <div class="game-frame" ref="frameEl">
@@ -29,7 +29,7 @@
           frameborder="0"
           allow="fullscreen; autoplay; gamepad"
         ></iframe>
-        <div class="game-tip">点击游戏区域后，用 WASD 移动 · 空格放技能 · E 交互</div>
+        <div class="game-tip">点击游戏区域后，用 WASD 移动 · 空格放技能 · E 交互 · 可点「好友联机」组队</div>
       </div>
     </section>
 

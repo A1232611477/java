@@ -153,15 +153,44 @@ public class HomeService {
         return tree;
     }
 
-    /** 最新发布的精选内容 */
+    /**
+     * 精选内容：视频 + 图文混合展示。
+     * 优先取最新的视频内容（最多 videoCount 条），其余用最新图文内容补齐到 n 条，
+     * 保证首页精选既有可播放的视频，又保留图文精选的多样性。
+     */
     private List<ContentSummaryVO> getFeatured(int n) {
-        List<Content> list = contentMapper.selectList(
+        int videoCount = n / 2; // 视频占一半（3 条），图文补齐另一半
+        Map<Long, String> catName = categoryNameMap();
+
+        // 1. 带视频的已发布内容（最新在前）
+        List<Content> videoList = contentMapper.selectList(
                 Wrappers.lambdaQuery(Content.class)
                         .eq(Content::getStatus, 1)
+                        .isNotNull(Content::getVideoUrl)
+                        .ne(Content::getVideoUrl, "")
                         .orderByDesc(Content::getCreatedAt)
-                        .last("LIMIT " + n));
-        Map<Long, String> catName = categoryNameMap();
-        return list.stream().map(c -> toSummary(c, catName)).collect(Collectors.toList());
+                        .last("LIMIT " + videoCount));
+
+        List<ContentSummaryVO> result = new ArrayList<>(videoList.stream()
+                .map(c -> toSummary(c, catName))
+                .collect(Collectors.toList()));
+
+        // 2. 用最新图文内容（无视频）补齐到 n 条
+        int remain = n - result.size();
+        if (remain > 0) {
+            List<Content> fillList = contentMapper.selectList(
+                    Wrappers.lambdaQuery(Content.class)
+                            .eq(Content::getStatus, 1)
+                            .and(w -> w.isNull(Content::getVideoUrl)
+                                    .or().eq(Content::getVideoUrl, ""))
+                            .orderByDesc(Content::getCreatedAt)
+                            .last("LIMIT " + remain));
+            result.addAll(fillList.stream()
+                    .map(c -> toSummary(c, catName))
+                    .collect(Collectors.toList()));
+        }
+
+        return result;
     }
 
     private Map<Long, String> categoryNameMap() {

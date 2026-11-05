@@ -76,7 +76,54 @@
   #toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);color:var(--gold2);
     font-size:15px;letter-spacing:1px;text-shadow:0 2px 8px #000;opacity:0;transition:.3s;pointer-events:none}
   #toast.show{opacity:1}
+
+  /* ===== 联机大厅 ===== */
+  #lobby{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(8,10,18,.9);backdrop-filter:blur(8px);z-index:40;padding:24px}
+  #lobby.show{display:flex}
+  .lobby-box{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);
+    border-radius:16px;padding:28px 30px;text-align:center}
+  .lobby-box h2{font-size:24px;color:var(--gold2);letter-spacing:2px}
+  .lobby-sub{color:var(--dim);font-size:13px;margin:8px 0 20px}
+  .lobby-btn{display:block;width:100%;padding:12px;font-size:16px;font-weight:700;letter-spacing:2px;
+    color:#1a1208;background:linear-gradient(180deg,var(--gold2),var(--gold));border:none;border-radius:10px;
+    cursor:pointer;margin-bottom:12px;transition:.15s}
+  .lobby-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,168,106,.4)}
+  .lobby-btn.ghost{background:transparent;color:var(--gold2);border:1px solid var(--gold)}
+  .lobby-btn.ghost:hover{background:rgba(201,168,106,.1)}
+  .lobby-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .lobby-join{display:flex;gap:8px;margin-bottom:12px}
+  .lobby-join input{flex:1;padding:11px;font-size:16px;letter-spacing:3px;text-align:center;
+    background:#0d0f1a;border:1px solid var(--line);border-radius:10px;color:var(--gold2)}
+  .lobby-join .lobby-btn{margin-bottom:0;width:auto;padding:12px 18px}
+  .lobby-back{background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;text-decoration:underline}
+  .lobby-back:hover{color:var(--txt)}
+  .room-no{font-size:16px;color:var(--txt);margin-bottom:16px}
+  .room-pick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  .room-pick .pk{width:52px;padding:8px 4px;background:#0d0f1a;border:1px solid var(--line);
+    border-radius:10px;cursor:pointer;text-align:center;transition:.15s}
+  .room-pick .pk .pk-g{font-size:18px}
+  .room-pick .pk .pk-n{font-size:10px;color:var(--dim);margin-top:3px}
+  .room-pick .pk.sel{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(232,207,154,.4)}
+  .room-pick .pk.sel .pk-n{color:var(--gold2)}
+  .room-no b{color:var(--gold2);font-size:24px;letter-spacing:3px;margin:0 4px}
+  .copy-btn{margin-left:8px;padding:2px 10px;font-size:12px;color:var(--gold2);background:none;
+    border:1px solid var(--gold);border-radius:12px;cursor:pointer}
+  .room-players{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-height:240px;overflow-y:auto}
+  .rp{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#0d0f1a;
+    border:1px solid var(--line);border-radius:10px;text-align:left}
+  .rp .rp-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#2a3048,#1a2038);
+    display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--line);flex-shrink:0}
+  .rp .rp-name{color:var(--txt);font-size:14px;font-weight:700}
+  .rp .rp-tag{margin-left:auto;font-size:11px;color:var(--gold2)}
+  .rp .rp-tag.host{color:var(--red)}
+  .rp .rp-role{font-size:12px;color:var(--dim)}
+  .room-actions{display:flex;gap:8px;margin-bottom:10px}
+  .room-actions .lobby-btn{margin-bottom:0;flex:1}
+  .lobby-tip{font-size:12px;color:var(--dim);margin-top:4px}
 </style>
+<script src="sockjs.min.js"></script>
+<script src="stomp.umd.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -99,10 +146,39 @@
       </div>
       <div class="roles" id="roles"></div>
       <button id="startBtn">进入庄园</button>
+      <button id="mpBtn" style="background:none;border:1px solid var(--gold);color:var(--gold2);
+        padding:9px 30px;border-radius:24px;font-size:14px;cursor:pointer;margin-top:-6px">🕹 好友联机</button>
       <div class="sub" style="font-size:12px">
         <span class="hint-key">W</span><span class="hint-key">A</span><span class="hint-key">S</span><span class="hint-key">D</span> 移动　
         <span class="hint-key">空格</span> 使用技能　
         <span class="hint-key">E</span> 修机 / 开门 / 救人 / 治疗
+      </div>
+    </div>
+
+    <!-- 联机大厅 -->
+    <div id="lobby">
+      <div class="lobby-box">
+        <h2>🕹 好友联机</h2>
+        <p class="lobby-sub">和朋友组队，共同对抗 AI 监管者·杰克</p>
+        <div id="lobbyEntry">
+          <button class="lobby-btn" onclick="mpCreate()">创建房间</button>
+          <div class="lobby-join">
+            <input id="roomInput" placeholder="输入 6 位房间号" maxlength="6" />
+            <button class="lobby-btn ghost" onclick="mpJoin()">加入</button>
+          </div>
+          <button class="lobby-back" onclick="closeLobby()">返回单人模式</button>
+        </div>
+        <div id="lobbyRoom" style="display:none">
+          <div class="room-no">房间号 <b id="roomNo">------</b> <button class="copy-btn" onclick="copyRoom()">复制</button></div>
+          <div class="room-pick" id="roomPick"></div>
+          <div class="room-players" id="roomPlayers"></div>
+          <div class="room-actions">
+            <button class="lobby-btn ghost" id="btnReady" onclick="mpReady()">准备</button>
+            <button class="lobby-btn" id="btnStart" onclick="mpStart()" style="display:none">开始游戏</button>
+            <button class="lobby-back" onclick="mpLeave()">离开</button>
+          </div>
+          <p class="lobby-tip" id="roomTip">等待好友加入…（至少 2 人才能开局）</p>
+        </div>
       </div>
     </div>
 
@@ -444,12 +520,22 @@ function update(dt){
   const p = g.team[0];
   const h = g.hunter;
 
+  const isMp = (typeof MP !== 'undefined' && MP.active);
+  const isHost = isMp && MP.isHost;
+
   // 更新玩家
   updateSurvivorPlayer(p, dt);
-  // 更新 AI 队友
-  for(let i=1;i<g.team.length;i++) updateSurvivorAI(g.team[i], dt);
-  // 更新监管者
-  updateHunter(h, dt);
+  // 更新 AI 队友（联机非房主端：AI 由房主权威驱动，本地不跑）
+  for(let i=1;i<g.team.length;i++){
+    const s = g.team[i];
+    if(isMp && !isHost && s.isRemote) continue;      // 远端真人：位置由网络驱动
+    if(isMp && !isHost && !s.isRemote) continue;     // 非房主端 AI 由房主驱动
+    updateSurvivorAI(s, dt);
+  }
+  // 更新监管者（联机非房主端：监管者由房主权威驱动，本地不跑）
+  if(!(isMp && !isHost)){
+    updateHunter(h, dt);
+  }
 
   // 技能冷却 & 状态计时
   g.team.forEach(s => {
@@ -468,7 +554,16 @@ function update(dt){
   // 特效更新
   for(let i=FX.length-1;i>=0;i--){ FX[i].t += dt; if(FX[i].t > FX[i].life) FX.splice(i,1); }
 
-  checkEnd();
+  // 联机：非房主端应用房主权威状态；房主端打包并广播
+  if(typeof MP !== 'undefined' && MP.active){
+    if(!MP.isHost) applyAuthority();
+    mpOnFrame();
+  }
+
+  // 联机非房主端：胜负由房主权威判定，本地不重复判定
+  if(!(typeof MP !== 'undefined' && MP.active && !MP.isHost)){
+    checkEnd();
+  }
 }
 
 // ---------- 玩家控制 ----------
@@ -844,6 +939,9 @@ function drawSurvivor(s){
   if(s.isPlayer){
     ctx.fillStyle = '#fff'; ctx.font='11px sans-serif'; ctx.textAlign='center';
     ctx.fillText(s.name + '（你）', s.x, s.y - s.r - 20);
+  } else if(s.isRemote && s.remoteNick){
+    ctx.fillStyle = '#a8c8e8'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(s.remoteNick + '（友）', s.x, s.y - s.r - 20);
   }
 }
 
@@ -950,6 +1048,426 @@ function drawHUD(){
 // 启动：先渲染空场景
 resize();
 render();
+</script>
+
+<script>
+/* ============================================================
+ * 好友联机（真人队友协作）
+ * - 通过 SockJS + STOMP 连后端 /ws
+ * - 房主创建房间，好友输入 6 位房间号加入
+ * - 每人控制一名求生者，其余位置 AI 补齐，共同对抗 AI 监管者
+ * - 房主对 AI 求生者 / 监管者 / 胜负做权威模拟并广播，其余端渲染
+ * ============================================================ */
+
+const MP = {
+  active: false,      // 本局是否为联机模式
+  roomId: null,
+  stomp: null,
+  connected: false,
+  isHost: false,
+  myUserId: null,
+  // 远端真人玩家：userId -> { nickname, roleId, slot, x, y, hp, alive, escaped, chaired, ready }
+  remote: new Map(),
+  myRole: null,       // 我选择的角色
+  lobby: false,       // 是否在大厅界面
+  ready: false,
+  // 帧同步节流
+  lastSend: 0,
+  // 房主广播的权威状态（非房主端据此渲染）
+  authority: null,
+};
+
+// ---------- token 读取（与主站登录态一致） ----------
+function mpGetToken(){
+  try {
+    return window.sessionStorage.getItem('idv_token') ||
+           window.localStorage.getItem('idv_token') || '';
+  } catch(e){ return ''; }
+}
+
+// ---------- 大厅 UI ----------
+function openLobby(){
+  const token = mpGetToken();
+  if(!token){
+    toast('请先在主站登录后再联机');
+    return;
+  }
+  MP.lobby = true;
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('lobby').classList.add('show');
+  document.getElementById('lobbyEntry').style.display = '';
+  document.getElementById('lobbyRoom').style.display = 'none';
+  mpConnect();
+}
+function closeLobby(){
+  MP.lobby = false;
+  document.getElementById('lobby').classList.remove('show');
+  document.getElementById('menu').style.display = '';
+  mpDisconnect();
+}
+
+document.getElementById('mpBtn').onclick = openLobby;
+
+// ---------- WebSocket 连接 ----------
+function mpConnect(){
+  if(MP.stomp && MP.connected) return;
+  const token = mpGetToken();
+  const socket = new SockJS('/ws');
+  const stomp = Stomp.over(socket);
+  // 关闭 SockJS 的调试日志
+  stomp.debug = function(){};
+  MP.stomp = stomp;
+  stomp.connect(
+    { Authorization: 'Bearer ' + token },
+    function(){
+      MP.connected = true;
+      // 订阅个人错误回发
+      stomp.subscribe('/user/queue/error', function(m){
+        const d = JSON.parse(m.body);
+        if(d && d.message) toast(d.message);
+      });
+    },
+    function(err){
+      MP.connected = false;
+      toast('联机连接失败，请确认后端已启动');
+    }
+  );
+}
+function mpDisconnect(){
+  try { if(MP.stomp && MP.stomp.connected) MP.stomp.disconnect(); } catch(e){}
+  MP.stomp = null; MP.connected = false;
+}
+
+// 向服务端发送联机消息
+function mpSend(dest, payload){
+  if(!MP.stomp || !MP.stomp.connected){ toast('未连接到联机服务'); return false; }
+  MP.stomp.send('/app/game/' + dest, {}, JSON.stringify(payload || {}));
+  return true;
+}
+
+// 订阅房间频道
+function mpSubscribeRoom(roomId){
+  if(!MP.stomp || !MP.stomp.connected) return;
+  MP.stomp.subscribe('/topic/room/' + roomId, function(m){
+    mpOnRoomMessage(JSON.parse(m.body));
+  });
+}
+
+// ---------- 房间消息处理 ----------
+function mpOnRoomMessage(d){
+  if(!d) return;
+  const type = d.type;
+  if(type === 'ERROR'){ if(d.message) toast(d.message); return; }
+
+  if(type === 'STARTED'){
+    MP.active = true;
+    MP.remote.clear();
+    // 从 players 里解析远端真人（排除自己）
+    (d.players || []).forEach(p => {
+      if(p.userId === MP.myUserId){ MP.myRole = p.roleId || MP.myRole; return; }
+      MP.remote.set(p.userId, {
+        nickname: p.nickname, roleId: p.roleId, slot: p.slot,
+        x: p.x || 0, y: p.y || 0, hp: p.hp, alive: p.alive,
+        escaped: p.escaped, chaired: p.chaired
+      });
+    });
+    mpStartLocalGame();
+    return;
+  }
+
+  if(type === 'ROOM_STATE' && d.started){
+    // 对局中：接收远端玩家位置 + 房主权威状态（含 hunter/ai/machines）
+    (d.players || []).forEach(p => {
+      if(p.userId === MP.myUserId) return;
+      if(MP.remote.has(p.userId)){
+        const r = MP.remote.get(p.userId);
+        r.x = p.x; r.y = p.y; r.hp = p.hp; r.alive = p.alive;
+        r.escaped = p.escaped; r.chaired = p.chaired; r.slot = p.slot; r.roleId = p.roleId;
+      }
+    });
+    if(d.authority && !MP.isHost){
+      MP.authority = d.authority;
+    }
+    return;
+  }
+
+  if(type === 'JOINED' || type === 'LEFT' || type === 'ROOM_STATE'){
+    // 大厅状态刷新
+    mpRenderLobby(d);
+  }
+}
+
+// ---------- 创建 / 加入 ----------
+async function mpCreate(){
+  const res = await mpApi('/api/game/create', { method:'POST' });
+  if(!res) return;
+  MP.roomId = res.roomId; MP.isHost = true; MP.myUserId = res.myUserId;
+  mpEnterRoom();
+}
+async function mpJoin(){
+  const rid = document.getElementById('roomInput').value.trim();
+  if(!/^\d{6}$/.test(rid)){ toast('请输入 6 位数字房间号'); return; }
+  const res = await mpApi('/api/game/join?roomId=' + rid, { method:'POST' });
+  if(!res) return;
+  MP.roomId = res.roomId; MP.isHost = false; MP.myUserId = res.myUserId;
+  mpEnterRoom();
+}
+function mpEnterRoom(){
+  document.getElementById('lobbyEntry').style.display = 'none';
+  document.getElementById('lobbyRoom').style.display = '';
+  document.getElementById('roomNo').textContent = MP.roomId;
+  mpRenderRolePicker();
+  mpSubscribeRoom(MP.roomId);
+  // 拉取当前房间状态渲染
+  mpApi('/api/game/room/' + MP.roomId).then(list => {
+    if(list && list.length){
+      mpRenderLobby({ players: list, hostId: mpHostIdOf(list) });
+    }
+  });
+  // 刷新按钮态
+  mpRefreshButtons();
+}
+
+// 大厅选角
+function mpRenderRolePicker(){
+  const box = document.getElementById('roomPick');
+  box.innerHTML = '';
+  ROLES.forEach((r, i) => {
+    const d = document.createElement('div');
+    d.className = 'pk' + (i === selectedRole ? ' sel' : '');
+    d.innerHTML = `<div class="pk-g">${r.glyph}</div><div class="pk-n">${r.name}</div>`;
+    d.onclick = () => { selectedRole = i; mpRenderRolePicker(); mpPickRole(); };
+    box.appendChild(d);
+  });
+}
+function mpPickRole(){
+  if(!MP.roomId) return;
+  const role = ROLES[selectedRole];
+  mpSend('role', { roomId: MP.roomId, roleId: role.id });
+}
+function mpHostIdOf(list){
+  for(const p of list) if(p.host) return p.userId;
+  return list[0] ? list[0].userId : null;
+}
+
+// REST 封装（带 token）
+async function mpApi(path, options){
+  const token = mpGetToken();
+  const opt = Object.assign({ method:'GET' }, options || {});
+  const headers = { 'Content-Type':'application/json' };
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  if(opt.body) opt.body = JSON.stringify(opt.body);
+  let res;
+  try {
+    res = await fetch(path, { method: opt.method, headers, body: opt.body });
+  } catch(e){
+    toast('连接不上后端（' + path + '）'); return null;
+  }
+  const payload = await res.json().catch(()=>null);
+  if(!payload){ toast('后端返回异常'); return null; }
+  if(payload.code !== 200){ toast(payload.message || '操作失败'); return null; }
+  return payload.data;
+}
+
+// ---------- 大厅渲染 ----------
+function mpRenderLobby(d){
+  const players = d.players || [];
+  // 记录自己的 userId（通过 hostId 或首个 host 判断，配合 STARTED 时服务器回传）
+  const box = document.getElementById('roomPlayers');
+  box.innerHTML = '';
+  players.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'rp';
+    const roleName = mpRoleName(p.roleId);
+    row.innerHTML = `<div class="rp-ava">${roleName ? mpRoleGlyph(p.roleId) : '·'}</div>
+      <div>
+        <div class="rp-name">${p.nickname || '玩家'}${p.host ? ' <span style="color:#e05a5a;font-size:11px">[房主]</span>' : ''}</div>
+        <div class="rp-role">${roleName ? roleName : '未选角'}</div>
+      </div>
+      <div class="rp-tag">${p.ready ? '已准备' : '未准备'}</div>`;
+    box.appendChild(row);
+  });
+
+  // 按钮态
+  const isHost = d.hostId === MP.myUserId || MP.isHost;
+  MP.isHost = isHost;
+  const btnReady = document.getElementById('btnReady');
+  const btnStart = document.getElementById('btnStart');
+  btnReady.textContent = MP.ready ? '取消准备' : '准备';
+  btnStart.style.display = isHost ? '' : 'none';
+  btnStart.disabled = players.length < 2;
+  document.getElementById('roomTip').textContent =
+    players.length < 2 ? '等待好友加入…（至少 2 人才能开局）'
+    : (isHost ? '可以开始游戏了！' : '等待房主开始游戏…');
+}
+
+function mpRoleName(roleId){
+  const r = ROLES.find(x => x.id === roleId);
+  return r ? r.name : '';
+}
+function mpRoleGlyph(roleId){
+  const r = ROLES.find(x => x.id === roleId);
+  return r ? r.glyph : '·';
+}
+
+function mpRefreshButtons(){
+  // 占位：进入房间后由 mpRenderLobby 更新
+}
+
+// ---------- 准备 / 开局 / 离开 ----------
+function mpReady(){
+  if(!MP.roomId){ return; }
+  MP.ready = !MP.ready;
+  mpSend('ready', { roomId: MP.roomId });
+}
+function mpStart(){
+  if(!MP.roomId){ return; }
+  mpSend('start', { roomId: MP.roomId });
+}
+function mpLeave(){
+  if(MP.roomId){ mpSend('leave', { roomId: MP.roomId }); }
+  MP.roomId = null; MP.isHost = false; MP.active = false; MP.ready = false; MP.remote.clear();
+  closeLobby();
+}
+function copyRoom(){
+  try { navigator.clipboard.writeText(MP.roomId); toast('房间号已复制'); }
+  catch(e){ toast('复制失败，请手动记下房间号'); }
+}
+
+// ============================================================
+// 联机对局集成（复用单人游戏的 game 对象）
+// ============================================================
+
+// 联机开局：构建 team（我=0，远端真人=1..，其余 AI 补齐）
+function mpStartLocalGame(){
+  const role = ROLES[selectedRole];
+  const machines = genMachines();
+  DOORS.forEach(d => d.open = false);
+
+  const spawns = [[150,470],[1450,470],[150,150],[1450,150]];
+  const team = [ makeSurvivor(role, spawns[0], true) ];
+
+  // 远端真人玩家按 slot 排序，放入 team[1..3]
+  const remotes = Array.from(MP.remote.values()).sort((a,b)=>a.slot-b.slot);
+  const aiPool = [ROLES[1], ROLES[2], ROLES[4]]; // 佣兵/医生/先知
+  let aiIdx = 0;
+  for(let i=1;i<4;i++){
+    const remote = remotes[i-1];
+    if(remote){
+      const rRole = ROLES.find(x => x.id === remote.roleId) || ROLES[1];
+      const s = makeSurvivor(rRole, spawns[i], false);
+      s.isRemote = true; s.remoteUserId = remote.userId; s.remoteNick = remote.nickname;
+      s.x = remote.x || spawns[i][0]; s.y = remote.y || spawns[i][1];
+      team.push(s);
+    } else {
+      const s = makeSurvivor(aiPool[aiIdx++ % aiPool.length], spawns[i], false);
+      team.push(s);
+    }
+  }
+
+  game = {
+    role, machines, team,
+    hunter: makeHunter(),
+    over: false, result: null,
+    time: 0, elapsed: 0,
+    survivorsAlive: 4, escaped: 0,
+    keys: {},
+  };
+
+  document.getElementById('lobby').classList.remove('show');
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('overlay').classList.remove('show');
+  if(raf) cancelAnimationFrame(raf);
+  resize();
+  loop();
+}
+
+// 供主循环调用的联机钩子（在 update 末尾由 mpOnFrame 处理）
+function mpOnFrame(){
+  if(!MP.active || !game || game.over) return;
+
+  // 1) 上报自己的位置/状态（节流 ~10Hz）
+  const now = performance.now();
+  if(now - MP.lastSend > 100){
+    MP.lastSend = now;
+    const p = game.team[0];
+    mpSend('move', {
+      roomId: MP.roomId,
+      x: Math.round(p.x*10)/10, y: Math.round(p.y*10)/10,
+      hp: p.hp, alive: p.alive, escaped: p.escaped, chaired: p.chaired
+    });
+  }
+
+  // 2) 房主：广播权威状态（AI 求生者 + 监管者 + 密码机 + 门）
+  if(MP.isHost){
+    mpSend('host', {
+      roomId: MP.roomId,
+      authority: mpBuildAuthority()
+    });
+  }
+
+  // 3) 非房主：用远端真人位置覆盖 team 里的 remote 槽位
+  if(!MP.isHost){
+    applyRemotePositions();
+  }
+}
+
+// 房主打包权威状态
+function mpBuildAuthority(){
+  const g = game;
+  return {
+    hunter: { x: g.hunter.x, y: g.hunter.y, stunT: g.hunter.stunT, carrying: g.hunter.carrying ? true : false },
+    aiSurvivors: g.team.filter(s => !s.isPlayer && !s.isRemote).map(s => ({
+      slot: g.team.indexOf(s), x: s.x, y: s.y, hp: s.hp, alive: s.alive, escaped: s.escaped, chaired: s.chaired
+    })),
+    machines: g.machines.map(m => ({ x:m.x, y:m.y, done:m.done, prog:m.prog })),
+    doors: DOORS.map(d => ({ open: d.open })),
+    escaped: g.escaped,
+    over: g.over, win: g.result === true,
+  };
+}
+
+// 非房主：用远端真人位置覆盖 remote 槽位
+function applyRemotePositions(){
+  for(const s of game.team){
+    if(!s.isRemote) continue;
+    const r = MP.remote.get(s.remoteUserId);
+    if(r){
+      s.x = r.x; s.y = r.y; s.hp = r.hp; s.alive = r.alive;
+      s.escaped = r.escaped; s.chaired = r.chaired;
+    }
+  }
+}
+
+// 非房主：用房主广播的权威状态覆盖 AI / 监管者 / 密码机
+function applyAuthority(){
+  const a = MP.authority;
+  if(!a) return;
+  if(a.hunter){ game.hunter.x = a.hunter.x; game.hunter.y = a.hunter.y; game.hunter.stunT = a.hunter.stunT || 0; }
+  if(a.aiSurvivors){
+    for(const as of a.aiSurvivors){
+      const s = game.team[as.slot];
+      if(s && !s.isPlayer && !s.isRemote){
+        s.x = as.x; s.y = as.y; s.hp = as.hp; s.alive = as.alive; s.escaped = as.escaped; s.chaired = as.chaired;
+      }
+    }
+  }
+  if(a.machines){
+    a.machines.forEach((m, i) => {
+      if(game.machines[i]){ game.machines[i].done = m.done; game.machines[i].prog = m.prog; }
+    });
+  }
+  if(a.doors){
+    a.doors.forEach((d, i) => { if(DOORS[i]) DOORS[i].open = d.open; });
+  }
+  if(a.over && !game.over){
+    game.over = true; game.result = a.win === true;
+    endGame(game.result);
+  }
+}
+
+// 服务端转发 host 广播的消息
+// 需要在 controller 增加 /game/host 端点 —— 通过 action 转发实现，见后端。
 </script>
 </body>
 </html>
