@@ -75,7 +75,10 @@
         <!-- 角色图鉴内容：角色资料卡（弹详情） -->
         <div v-else-if="hasCharacters" class="char-grid">
           <article v-for="r in characterResults" :key="r.id" class="char-card" @click="openCharacter(r)">
-            <div class="char-avatar">{{ (r.title || '·').charAt(0) }}</div>
+            <div class="char-avatar">
+              <img v-if="r.coverUrl" class="char-avatar-img" :src="r.coverUrl" :alt="r.title" />
+              <span v-else class="char-avatar-fallback">{{ (r.title || '·').charAt(0) }}</span>
+            </div>
             <div class="char-body">
               <h3 class="char-title">{{ r.title }}</h3>
               <p class="char-desc">{{ r.desc }}</p>
@@ -184,6 +187,11 @@
                 <span class="video-cat">{{ detail.subCategory || detail.category }}</span>
                 <span class="video-author">{{ detail.author || '官方' }}</span>
                 <span class="video-views">▶ {{ detail.viewCount || 0 }}</span>
+              </div>
+
+              <!-- 角色大图（角色图鉴资料卡，有封面时展示） -->
+              <div v-if="detailKind === 'character' && detail.coverUrl" class="gd-cover">
+                <img :src="detail.coverUrl" :alt="detail.title" />
               </div>
 
               <!-- 视频（攻略等含视频内容） -->

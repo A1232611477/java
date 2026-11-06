@@ -367,3 +367,47 @@ INSERT IGNORE INTO `t_content`
 -- ============================================================================
 -- ALTER TABLE `t_user` DROP INDEX `uk_phone`;
 -- ALTER TABLE `t_user` DROP COLUMN `phone`;
+
+-- ============================================================================
+-- 7.7 角色图鉴：补充角色封面头像（cover_url 指向前端 public/characters/{id}.svg）。
+--     头像为原创暗黑哥特风格 SVG（非官方立绘），随前端静态资源一起发布。
+--     幂等：按 id 精确更新，不影响其它字段。
+-- ============================================================================
+UPDATE `t_content` SET `cover_url`='/characters/30.svg' WHERE `id`=30 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/31.svg' WHERE `id`=31 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/32.svg' WHERE `id`=32 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/33.svg' WHERE `id`=33 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/34.svg' WHERE `id`=34 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/35.svg' WHERE `id`=35 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/36.svg' WHERE `id`=36 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/37.svg' WHERE `id`=37 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/38.svg' WHERE `id`=38 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/39.svg' WHERE `id`=39 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/40.svg' WHERE `id`=40 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/41.svg' WHERE `id`=41 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/42.svg' WHERE `id`=42 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/43.svg' WHERE `id`=43 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/44.svg' WHERE `id`=44 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/45.svg' WHERE `id`=45 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/46.svg' WHERE `id`=46 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/47.svg' WHERE `id`=47 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/50.svg' WHERE `id`=50 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/51.svg' WHERE `id`=51 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/52.svg' WHERE `id`=52 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/53.svg' WHERE `id`=53 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/54.svg' WHERE `id`=54 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/55.svg' WHERE `id`=55 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/56.svg' WHERE `id`=56 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/57.svg' WHERE `id`=57 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/58.svg' WHERE `id`=58 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/59.svg' WHERE `id`=59 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/60.svg' WHERE `id`=60 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/61.svg' WHERE `id`=61 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/62.svg' WHERE `id`=62 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/63.svg' WHERE `id`=63 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/64.svg' WHERE `id`=64 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/65.svg' WHERE `id`=65 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/66.svg' WHERE `id`=66 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/67.svg' WHERE `id`=67 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/68.svg' WHERE `id`=68 AND `top_category_id`=1;
+UPDATE `t_content` SET `cover_url`='/characters/69.svg' WHERE `id`=69 AND `top_category_id`=1;

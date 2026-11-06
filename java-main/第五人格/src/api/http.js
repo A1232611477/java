@@ -1,9 +1,9 @@
 // 统一请求封装：拼后端地址、自动带 JWT、统一处理 { code, message, data } 结构
 //
-// 后端地址默认本机 8081 的 springBootTest；
+// 后端地址默认局域网 IP 192.168.68.35 的 8081 端口；
 // 如需修改，在项目根目录建 .env 写 VITE_API_BASE=http://xxx:8081
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.68.35:8081'
 
 const TOKEN_KEY = 'idv_token'
 const USER_KEY = 'idv_user'

@@ -34,7 +34,7 @@ start "IDV-FRONTEND" cmd /k ""%ROOT%启动前端.bat""
 
 echo.
 echo 已打开两个窗口，稍等十几秒后访问：
-echo    后端  http://localhost:8081
-echo    前端  http://localhost:5173
+echo    后端  http://192.168.68.35:8081
+echo    前端  http://192.168.68.35:5173
 echo.
 if not "%NO_PAUSE%"=="1" pause

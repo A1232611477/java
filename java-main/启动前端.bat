@@ -9,7 +9,7 @@ set "NODE_DIR=D:\Program Files\nodejs"
 if exist "%NODE_DIR%\node.exe" set "PATH=%NODE_DIR%;%PATH%"
 
 echo ============================================================
-echo   前端 第五人格（Vue3 + Vite）   地址：http://localhost:5173
+echo   前端 第五人格（Vue3 + Vite）   地址：http://192.168.68.35:5173
 echo   按 Ctrl+C 或直接关闭本窗口即可停止
 echo ============================================================
 echo.

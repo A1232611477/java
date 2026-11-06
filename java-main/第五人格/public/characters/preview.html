@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>角色图鉴头像预览</title>
+<style>
+  :root { --gold:#c9a86a; --gold2:#e8cf9a; --txt:#e8e6df; --dim:#8b93a8; --line:#2a3048; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background: radial-gradient(1200px 700px at 50% -10%, #1a2038 0%, #0d0f1a 60%);
+    color: var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    padding: 40px 24px;
+  }
+  h1 { text-align:center; font-size:26px; letter-spacing:3px; color:var(--gold2); margin-bottom:6px; }
+  .sub { text-align:center; color:var(--dim); font-size:13px; margin-bottom:36px; }
+  .group-title { font-size:18px; color:var(--gold); margin: 26px 0 14px; letter-spacing:2px; border-left:3px solid var(--gold); padding-left:12px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:16px; max-width:1100px; margin:0 auto; }
+  .card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border:1px solid rgba(159,178,216,0.2); border-radius:16px; padding:16px;
+    display:flex; flex-direction:column; align-items:center; gap:10px; transition:.18s;
+  }
+  .card:hover { border-color: rgba(216,177,90,0.55); transform: translateY(-4px); }
+  .card img { width:88px; height:88px; border-radius:50%; object-fit:cover; }
+  .name { font-size:14px; font-weight:700; color:var(--gold2); }
+  .tag { font-size:11px; color:var(--dim); }
+</style>
+</head>
+<body>
+  <h1>第五人格 · 角色图鉴头像预览</h1>
+  <p class="sub">38 个角色 · 原创暗黑哥特风格 SVG · 监管者暗红紫底 / 求生者深蓝底</p>
+
+  <div class="group-title">监管者（15）</div>
+  <div class="grid" id="hunters"></div>
+
+  <div class="group-title">求生者（23）</div>
+  <div class="grid" id="survivors"></div>
+
+<script>
+const data = {
+  hunters: [
+    [30,'红夫人·玛丽','水镜'],[31,'摄影师·约瑟夫','相机'],[32,'梦之女巫·伊德海拉','信徒之眼'],[33,'小提琴家·安东尼奥','音符'],
+    [34,'雕刻家·伽拉泰亚','雕像'],[35,'破轮·威尔三兄弟','车轮'],[36,'渔女·格蕾丝','水波'],[50,'小丑·裘克','火箭筒'],
+    [51,'黄衣之主·哈斯塔','触手'],[52,'邦邦·26号守卫','炸弹'],[53,'使徒·安','猫'],[54,'博士·珀西','能量电流'],
+    [55,'蜘蛛·瓦尔莱塔','蛛网'],[56,'鹿头·班恩','锁链'],[57,'厂长·里奥','傀儡']
+  ],
+  survivors: [
+    [37,'医生·艾米丽·黛儿','十字'],[38,'园丁·艾玛·伍兹','花'],[39,'佣兵·奈布·萨贝达','刀盾'],[40,'空军·玛尔塔','信号枪'],
+    [41,'机械师·特蕾西','齿轮'],[42,'先知·伊莱·克拉克','役鸟'],[43,'调香师·薇拉·奈尔','香水瓶'],[44,'勘探员·诺顿','磁铁'],
+    [45,'咒术师·帕缇夏','咒像'],[46,'入殓师·伊索·卡尔','化妆箱'],[47,'前锋·威廉·艾利斯','橄榄球'],[58,'魔术师·瑟维','礼帽'],
+    [59,'盲女·海伦娜','手杖'],[60,'牛仔·凯文','套索'],[61,'调酒师·黛米','鸡尾酒'],[62,'大副·何塞','怀表'],
+    [63,'野人·穆罗','野猪'],[64,'昆虫学家·梅莉','甲虫'],[65,'邮差·维克多','信件'],[66,'心理学家·艾达','心'],
+    [67,'病患·埃米尔','钩爪'],[68,'冒险家·库特','背包'],[69,'律师·弗雷迪','天平']
+  ]
+};
+function render(id, list){
+  const box = document.getElementById(id);
+  list.forEach(([rid, name, tag]) => {
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = `<img src="characters/${rid}.svg" alt="${name}"><div class="name">${name}</div><div class="tag">${tag}</div>`;
+    box.appendChild(d);
+  });
+}
+render('hunters', data.hunters);
+render('survivors', data.survivors);
+</script>
+</body>
+</html>

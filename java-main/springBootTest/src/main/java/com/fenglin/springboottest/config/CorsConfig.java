@@ -22,7 +22,9 @@ public class CorsConfig {
                         .allowedOriginPatterns(
                                 "http://localhost:5173", "http://127.0.0.1:5173",
                                 "http://localhost:4173", "http://127.0.0.1:4173",
-                                "http://localhost:5174", "http://127.0.0.1:5174")
+                                "http://localhost:5174", "http://127.0.0.1:5174",
+                                "http://192.168.68.35:5173", "http://192.168.68.35:4173",
+                                "http://192.168.68.35:5174")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
