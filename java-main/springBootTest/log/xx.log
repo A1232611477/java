@@ -1070,3 +1070,53 @@ Unconditional classes:
 2026-11-06 14:33:24  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
 2026-11-06 14:33:24  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 0 ms
 2026-11-06 14:54:57  INFO o.s.web.socket.config.WebSocketMessageBrokerStats.lambda$initLoggingTask$0 156:WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 2, active threads = 1, queued tasks = 0, completed tasks = 1]
+2026-11-09 08:39:35  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 2324 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-11-09 08:39:35  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-11-09 08:39:35  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-11-09 08:39:35  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-11-09 08:39:36  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-11-09 08:39:36  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-11-09 08:39:36  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-11-09 08:39:36  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-11-09 08:39:36  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 929 ms
+2026-11-09 08:39:36  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-11-09 08:39:36  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-11-09 08:39:36  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:Starting...
+2026-11-09 08:39:36  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@52d3067f]]
+2026-11-09 08:39:36  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:Started.
+2026-11-09 08:39:36  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-11-09 08:39:36  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 2.205 seconds (process running for 2.527)
+2026-11-09 08:39:37  INFO com.zaxxer.hikari.HikariDataSource.getConnection 109:HikariPool-1 - Starting...
+2026-11-09 08:39:37  INFO com.zaxxer.hikari.pool.HikariPool.checkFailFast 554:HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3d71ebef
+2026-11-09 08:39:37  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-1 - Start completed.
+2026-11-09 08:39:37  INFO c.f.springboottest.config.AdminDataInitializer.run 46:已创建内置管理员账号：admin / admin123（角色 ADMIN）
+2026-11-09 08:40:36  INFO o.s.web.socket.config.WebSocketMessageBrokerStats.lambda$initLoggingTask$0 156:WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2026-11-09 08:41:37  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-09 08:41:37  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
+2026-11-09 08:41:37  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 0 ms
+2026-11-09 08:52:27  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarting 53:Starting SpringBootTestApplication using Java 21.0.10 with PID 2684 (D:\workSpace\java\java-main\springBootTest\target\classes started by Administrator in D:\workSpace\java\java-main\springBootTest)
+2026-11-09 08:52:27  INFO c.fenglin.springboottest.SpringBootTestApplication.logStartupProfileInfo 658:The following 1 profile is active: "dev"
+2026-11-09 08:52:27  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-11-09 08:52:27  INFO o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor.logTo 252:For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-11-09 08:52:29  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize 111:Tomcat initialized with port 8081 (http)
+2026-11-09 08:52:29  INFO org.apache.catalina.core.StandardService.log 168:Starting service [Tomcat]
+2026-11-09 08:52:29  INFO org.apache.catalina.core.StandardEngine.log 168:Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-11-09 08:52:29  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring embedded WebApplicationContext
+2026-11-09 08:52:29  INFO o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext 301:Root WebApplicationContext: initialization completed in 1207 ms
+2026-11-09 08:52:29  INFO o.s.b.a.web.servlet.WelcomePageHandlerMapping.<init> 59:Adding welcome page: class path resource [static/index.html]
+2026-11-09 08:52:29  INFO o.s.b.d.autoconfigure.OptionalLiveReloadServer.startServer 59:LiveReload server is running on port 35729
+2026-11-09 08:52:30  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:Starting...
+2026-11-09 08:52:30  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@35097c54]]
+2026-11-09 08:52:30  INFO o.s.m.simp.broker.SimpleBrokerMessageHandler.info 117:Started.
+2026-11-09 08:52:30  INFO o.s.boot.web.embedded.tomcat.TomcatWebServer.start 243:Tomcat started on port 8081 (http) with context path '/'
+2026-11-09 08:52:30  INFO c.fenglin.springboottest.SpringBootTestApplication.logStarted 59:Started SpringBootTestApplication in 2.439 seconds (process running for 2.721)
+2026-11-09 08:52:30  INFO com.zaxxer.hikari.HikariDataSource.getConnection 109:HikariPool-1 - Starting...
+2026-11-09 08:52:30  INFO com.zaxxer.hikari.pool.HikariPool.checkFailFast 554:HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@588bb1e4
+2026-11-09 08:52:30  INFO com.zaxxer.hikari.HikariDataSource.getConnection 122:HikariPool-1 - Start completed.
+2026-11-09 08:52:32  INFO o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log 168:Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-09 08:52:32  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 532:Initializing Servlet 'dispatcherServlet'
+2026-11-09 08:52:32  INFO org.springframework.web.servlet.DispatcherServlet.initServletBean 554:Completed initialization in 1 ms
+2026-11-09 08:53:30  INFO o.s.web.socket.config.WebSocketMessageBrokerStats.lambda$initLoggingTask$0 156:WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2026-11-09 09:23:30  INFO o.s.web.socket.config.WebSocketMessageBrokerStats.lambda$initLoggingTask$0 156:WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 1 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1], sockJsScheduler[pool size = 12, active threads = 1, queued tasks = 1, completed tasks = 219]
+2026-11-09 09:45:56  WARN o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver.logException 254:Resolved [com.fenglin.springboottest.common.BizException: 账号或密码错误]
+2026-11-09 09:53:30  INFO o.s.web.socket.config.WebSocketMessageBrokerStats.lambda$initLoggingTask$0 156:WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 1 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 3], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1], sockJsScheduler[pool size = 12, active threads = 1, queued tasks = 1, completed tasks = 580]

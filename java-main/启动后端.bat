@@ -16,7 +16,7 @@ set "SERVER__PORT="
 set "SERVER__HOST="
 
 echo ============================================================
-echo   后端 springBootTest      地址：http://localhost:8081
+echo   后端 springBootTest      地址：http://192.168.68.35:8081
 echo   按 Ctrl+C 或直接关闭本窗口即可停止
 echo ============================================================
 echo.

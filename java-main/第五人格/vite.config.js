@@ -10,7 +10,7 @@ export default defineConfig({
     // 好友联机 WebSocket（/ws）走相对路径，代理到后端 8081，跨设备也能用
     proxy: {
       '/ws': {
-        target: 'http://localhost:8081',
+        target: 'http://192.168.68.35:8081',
         ws: true,
         changeOrigin: true
       }
