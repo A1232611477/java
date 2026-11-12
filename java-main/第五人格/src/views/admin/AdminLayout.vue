@@ -8,6 +8,7 @@
       <nav class="admin-navs">
         <RouterLink to="/admin/dashboard" class="admin-nav" :class="{ active: $route.name === 'admin-dashboard' }">仪表盘</RouterLink>
         <RouterLink to="/admin/content" class="admin-nav" :class="{ active: $route.name === 'admin-content' }">内容管理</RouterLink>
+        <RouterLink to="/admin/user" class="admin-nav" :class="{ active: $route.name === 'admin-user' }">账号管理</RouterLink>
         <RouterLink to="/home" class="admin-nav ghost">返回首页</RouterLink>
       </nav>
       <div class="admin-side-foot">第五人格 · 内容中枢</div>
@@ -40,7 +41,11 @@ const router = useRouter()
 const { show } = useToast()
 const { user, signOut } = useAdminAuth()
 
-const crumb = computed(() => (route.name === 'admin-dashboard' ? '仪表盘' : '内容管理'))
+const crumb = computed(() => {
+  if (route.name === 'admin-dashboard') return '仪表盘'
+  if (route.name === 'admin-user') return '账号管理'
+  return '内容管理'
+})
 const initial = computed(() => (user.value?.nickname || '管').slice(0, 1))
 
 function onLogout() {

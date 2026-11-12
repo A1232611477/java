@@ -3,6 +3,11 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  // sockjs-client 在浏览器里引用了 Node 的 global，Vite 下必须映射为 globalThis，
+  // 否则 Friends.vue（私信聊天）的导入链会整体报错导致全站白屏
+  define: {
+    global: 'globalThis'
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

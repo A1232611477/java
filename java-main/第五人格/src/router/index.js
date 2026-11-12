@@ -4,10 +4,13 @@ import Register from '../views/Register.vue'
 import Home from '../views/Home.vue'
 import Shop from '../views/Shop.vue'
 import Community from '../views/Community.vue'
+import Forum from '../views/Forum.vue'
+import Friends from '../views/Friends.vue'
 import AdminLogin from '../views/AdminLogin.vue'
 import AdminLayout from '../views/admin/AdminLayout.vue'
 import AdminContent from '../views/admin/AdminContent.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
+import AdminUser from '../views/admin/AdminUser.vue'
 import { hasToken, getAdminToken } from '../api/http'
 
 const routes = [
@@ -17,6 +20,8 @@ const routes = [
   { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
   { path: '/shop', name: 'shop', component: Shop, meta: { requiresAuth: true } },
   { path: '/community', name: 'community', component: Community, meta: { requiresAuth: true } },
+  { path: '/forum', name: 'forum', component: Forum, meta: { requiresAuth: true } },
+  { path: '/friends', name: 'friends', component: Friends, meta: { requiresAuth: true } },
 
   // ============ 后台管理系统 ============
   // 仅登录页（无注册入口）；其余接口需管理员令牌
@@ -28,7 +33,8 @@ const routes = [
     children: [
       { path: '', redirect: { name: 'admin-content' } },
       { path: 'dashboard', name: 'admin-dashboard', component: AdminDashboard },
-      { path: 'content', name: 'admin-content', component: AdminContent }
+      { path: 'content', name: 'admin-content', component: AdminContent },
+      { path: 'user', name: 'admin-user', component: AdminUser }
     ]
   }
 ]

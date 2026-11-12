@@ -19,6 +19,8 @@
           :class="{ active: item === '首页' }"
           @click="onNav(item)"
         >{{ item }}</a>
+        <RouterLink to="/forum" class="nav-link">论坛</RouterLink>
+        <RouterLink to="/friends" class="nav-link">好友</RouterLink>
       </nav>
 
       <!-- 右侧：搜索栏 + 用户区 -->

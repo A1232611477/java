@@ -411,3 +411,56 @@ UPDATE `t_content` SET `cover_url`='/characters/66.svg' WHERE `id`=66 AND `top_c
 UPDATE `t_content` SET `cover_url`='/characters/67.svg' WHERE `id`=67 AND `top_category_id`=1;
 UPDATE `t_content` SET `cover_url`='/characters/68.svg' WHERE `id`=68 AND `top_category_id`=1;
 UPDATE `t_content` SET `cover_url`='/characters/69.svg' WHERE `id`=69 AND `top_category_id`=1;
+
+-- ============================================================================
+-- 玩家论坛 & 社交：好友关系 / 私信 / 论坛帖子
+-- ============================================================================
+
+-- 8. 好友关系表。status：0 待确认，1 已接受。
+--    约定 user_id < friend_id 时仅存一条（去重由应用层保证，这里允许两条方向记录，便于查询）
+CREATE TABLE IF NOT EXISTS `t_friend` (
+    `id`         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`    BIGINT      NOT NULL                COMMENT '发起方用户 id',
+    `friend_id`  BIGINT      NOT NULL                COMMENT '对方用户 id',
+    `status`     TINYINT     NOT NULL DEFAULT 0      COMMENT '状态：0 待确认，1 已接受',
+    `created_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user` (`user_id`),
+    KEY `idx_friend` (`friend_id`),
+    KEY `idx_user_friend` (`user_id`, `friend_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  COMMENT = '好友关系表';
+
+-- 9. 私信表。read_flag：0 未读，1 已读。
+CREATE TABLE IF NOT EXISTS `t_message` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `sender_id`   BIGINT       NOT NULL                COMMENT '发送方用户 id',
+    `receiver_id` BIGINT       NOT NULL                COMMENT '接收方用户 id',
+    `content`     VARCHAR(500) NOT NULL                COMMENT '消息内容',
+    `read_flag`   TINYINT      NOT NULL DEFAULT 0      COMMENT '是否已读：0 未读，1 已读',
+    `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_sender` (`sender_id`),
+    KEY `idx_receiver` (`receiver_id`),
+    KEY `idx_pair` (`sender_id`, `receiver_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  COMMENT = '私信表';
+
+-- 10. 论坛帖子表。
+CREATE TABLE IF NOT EXISTS `t_post` (
+    `id`         BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `author_id`  BIGINT       NOT NULL                COMMENT '发帖用户 id',
+    `title`      VARCHAR(120) NOT NULL                COMMENT '标题',
+    `content`    TEXT                                 COMMENT '正文',
+    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发布时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_author` (`author_id`),
+    KEY `idx_created` (`created_at`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  COMMENT = '论坛帖子表';

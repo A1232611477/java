@@ -63,3 +63,49 @@ export function fetchStats() {
 export function fetchCategoryOptions() {
   return adminRequest('/api/admin/content/categories/options')
 }
+
+// ---------- 账号管理 ----------
+
+/** 账号列表（分页 + 关键词 + 状态 + 角色过滤） */
+export function fetchUsers(params = {}) {
+  const qs = new URLSearchParams()
+  if (params.keyword) qs.set('keyword', params.keyword)
+  if (params.status !== undefined && params.status !== null && params.status !== '') {
+    qs.set('status', params.status)
+  }
+  if (params.role) qs.set('role', params.role)
+  if (params.page) qs.set('page', params.page)
+  if (params.size) qs.set('size', params.size)
+  const query = qs.toString()
+  return adminRequest(`/api/admin/user${query ? '?' + query : ''}`)
+}
+
+/** 账号概览统计 */
+export function fetchUserStats() {
+  return adminRequest('/api/admin/user/stats')
+}
+
+/** 新建账号 */
+export function createUser(payload) {
+  return adminRequest('/api/admin/user', { method: 'POST', body: payload })
+}
+
+/** 编辑账号（改昵称 / 角色 / 状态） */
+export function updateUser(id, payload) {
+  return adminRequest(`/api/admin/user/${id}`, { method: 'PUT', body: payload })
+}
+
+/** 切换禁用 / 启用 */
+export function setUserStatus(id, status) {
+  return adminRequest(`/api/admin/user/${id}/status?status=${status}`, { method: 'PATCH' })
+}
+
+/** 重置密码 */
+export function resetUserPassword(id, password) {
+  return adminRequest(`/api/admin/user/${id}/password`, { method: 'PATCH', body: { password } })
+}
+
+/** 删除账号 */
+export function deleteUser(id) {
+  return adminRequest(`/api/admin/user/${id}`, { method: 'DELETE' })
+}

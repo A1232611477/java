@@ -390,3 +390,98 @@ dist/                    构建产物（vite build），dist/index.html 需用 h
 ```
 登录态不互通，**账号互通**。实测：在页面上注册的账号，用 `POST /api/auth/login` 能直接拿到 token。
 
+---
+
+## 10. 后台账号管理（2026-11-12 新增）
+
+在已有「仪表盘 / 内容管理」之外，给管理员补了**账号管理**：查看、搜索、新建、改昵称/角色/状态、禁用/启用、重置密码、删除。
+
+### 10.1 后端（`/api/admin/user/**`，仍走 `AdminInterceptor` 校验 ADMIN 角色）
+
+| 接口 | 说明 |
+|---|---|
+| `GET /api/admin/user` | 分页列表，支持 `keyword`(昵称模糊) / `status` / `role` / `page` / `size` |
+| `GET /api/admin/user/stats` | 概览统计：`total` / `adminCount` / `disabled` |
+| `POST /api/admin/user` | 新建账号（`UserCreateForm`：nickname + password + role + status） |
+| `PUT /api/admin/user/{id}` | 编辑（`UserUpdateForm`：只覆盖非空字段 nickname / role / status） |
+| `PATCH /api/admin/user/{id}/status` | 禁用/启用（status=1 禁用） |
+| `PATCH /api/admin/user/{id}/password` | 重置密码（body `{"password":"..."}`） |
+| `DELETE /api/admin/user/{id}` | 删除账号 |
+
+新增文件：
+- `dto/AdminUserVO.java`（列表返回，含 updatedAt，不含密码）
+- `dto/UserCreateForm.java`（带 `@Pattern` 校验密码 8-20 位）
+- `dto/UserUpdateForm.java`
+- `service/AdminUserService.java`
+- `controller/AdminUserController.java`
+
+**内置超级管理员保护**：昵称为 `admin` 的账号禁止被禁用/删除/改角色/改昵称（`AdminUserService.assertNotRoot` 抛 403）。
+角色归一化：仅接受 `USER` / `ADMIN`，其它一律按 `USER`。
+
+### 10.2 前端
+
+- `src/api/admin.js` 新增 `fetchUsers / fetchUserStats / createUser / updateUser / setUserStatus / resetUserPassword / deleteUser`。
+- 新增 `src/views/admin/AdminUser.vue`（列表 + 统计卡 + 新建/编辑弹窗 + 重置密码弹窗）。
+- `src/views/admin/AdminLayout.vue` 侧边栏加「账号管理」导航，`crumb` 支持 `admin-user`。
+- `src/router/index.js` 加 `/admin/user`（`name: admin-user`，`requiresAdmin`）。
+- `src/style.css` 加 `.root-tag` / `.pwd-tip`。
+
+> 前端对内置 `admin` 账号同样隐藏「禁用/删除」按钮、并在编辑弹窗里锁定角色/状态下拉。
+
+---
+
+## 11. 玩家论坛 & 社交（2026-11-12 新增）
+
+新增三张表（见 `sql/init.sql` 第 8/9/10 段，幂等）：
+- `t_friend`：好友关系（status 0 待确认 / 1 已接受）
+- `t_message`：私信（sender_id / receiver_id / content / read_flag）
+- `t_post`：论坛帖子（author_id / title / content）
+
+### 11.1 后端接口（全部需要用户 JWT，走 `JwtInterceptor`）
+
+**社交 `/api/social/**`**（`SocialController` + `SocialService`）：
+| 接口 | 说明 |
+|---|---|
+| `GET /api/social/friends` | 好友列表 |
+| `GET /api/social/friend/requests` | 待处理请求（别人发给我的） |
+| `GET /api/social/user/search?keyword=` | 搜索用户（昵称模糊匹配；纯数字按 UID 精确匹配），排除自己 |
+| `POST /api/social/friend` | 添加好友 `{nickname}`（昵称精确或 UID）；若对方已发过请求则等同接受 |
+| `POST /api/social/friend/{id}/accept` / `/reject` | 接受 / 拒绝请求 |
+| `DELETE /api/social/friend/{id}` | 删除好友（双向删） |
+| `POST /api/social/message` | 发私信 `{receiverId, content}`，落库并实时推送给接收方 |
+| `GET /api/social/message/{peerId}` | 与某好友的聊天记录（并顺带标记对方消息已读） |
+| `GET /api/social/conversations` | 会话列表（最后一条 + 未读数） |
+| `GET /api/social/unread` | 未读总数 |
+
+**论坛 `/api/forum/**`**（`ForumController` + `ForumService`）：
+| 接口 | 说明 |
+|---|---|
+| `GET /api/forum?page&size` | 帖子分页列表（时间倒序，附作者昵称） |
+| `POST /api/forum` | 发帖 `{title, content}` |
+| `GET /api/forum/{id}` | 帖子详情 |
+| `DELETE /api/forum/{id}` | 删除（仅作者本人） |
+
+**私信实时推送**：新增 `web/ChatWebSocketController.java`，复用现有 `/ws` STOMP 端点与
+`WebSocketAuthInterceptor` 鉴权。前端订阅 `/user/queue/chat`，发送走 `/app/chat/send`。
+`SocialService.sendMessage` 内部用 `convertAndSendToUser` 点对点推送。
+
+新增文件：
+- entity：`Friend.java` / `Message.java` / `Post.java`
+- mapper：`FriendMapper` / `MessageMapper` / `PostMapper`
+- dto：`FriendUserVO` / `MessageVO` / `PostVO`
+- service：`SocialService` / `ForumService`
+- controller：`SocialController` / `ForumController`
+- web：`ChatWebSocketController`
+
+### 11.2 前端
+
+- `api/social.js` / `api/forum.js` 新增接口封装。
+- 新增 `views/Forum.vue`（发帖 + 帖子列表 + 详情弹窗 + 作者可删）。
+- 新增 `views/Friends.vue`（添加好友 / 请求处理 / 好友列表 / 私信聊天窗口，
+  用 `@stomp/stompjs` + `sockjs-client` 订阅 `/user/queue/chat` 实时收消息）。
+  添加好友输入框支持**实时模糊搜索下拉**（按昵称或 UID），点击候选即可添加。
+- `router/index.js` 加 `/forum`（name=forum）、`/friends`（name=friends），均 `requiresAuth`。
+- `components/NavBar.vue` 导航菜单追加「论坛」「好友」两个入口。
+
+> 好友聊天页里「联机组队」按钮跳转 `/community`（复用既有小游戏好友联机房间）。
+

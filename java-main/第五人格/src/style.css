@@ -853,6 +853,10 @@ select.inp { cursor: pointer; }
 .link-btn.danger { color: #ff9a9a; }
 .link-btn.danger:hover { color: #ffc2c2; }
 
+.root-tag { margin-left: 0.4rem; font-size: 0.72rem; padding: 0.14rem 0.45rem; border-radius: 999px; background: rgba(216,177,90,0.18); border: 1px solid rgba(216,177,90,0.5); color: var(--gold-light); }
+.pwd-tip { color: var(--text); font-size: 0.88rem; margin-bottom: 1rem; }
+.pwd-tip + .field { margin-top: 0.2rem; }
+
 .pager { display: flex; align-items: center; justify-content: flex-end; gap: 0.9rem; margin-top: 1.1rem; }
 .pager-info { color: var(--muted); font-size: 0.84rem; }
 
