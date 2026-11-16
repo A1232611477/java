@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五子棋 · 第五人格</title>
+<style>
+  :root {
+    --gold: #d8b15a;
+    --gold-light: #f6e1a4;
+    --blue: #2b5bb5;
+    --blue-light: #7fa8e8;
+    --ink-1: #04081a;
+    --ink-2: #081230;
+    --ink-3: #102248;
+    --text: #eaf1ff;
+    --muted: #9fb2d8;
+    --border: rgba(216, 177, 90, 0.4);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: radial-gradient(150% 130% at 18% -10%, var(--ink-3) 0%, var(--ink-2) 40%, var(--ink-1) 100%);
+    min-height: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px 12px 22px;
+  }
+  .wrap { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  .g-head { text-align: center; }
+  .g-title {
+    font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em;
+    background: linear-gradient(110deg, #fff 10%, var(--blue-light) 45%, var(--gold-light) 80%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .g-sub { font-size: 0.72rem; color: var(--muted); margin-top: 3px; letter-spacing: 0.08em; }
+
+  .bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .mode-btns { display: flex; gap: 6px; }
+  .mode {
+    padding: 5px 14px; border: 1px solid var(--border); border-radius: 999px;
+    background: transparent; color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: .18s;
+  }
+  .mode:hover { color: var(--gold-light); border-color: var(--gold); }
+  .mode.active { background: linear-gradient(120deg, var(--gold-light), var(--gold)); color: #1a1208; border-color: transparent; font-weight: 700; }
+
+  .turn {
+    min-width: 130px; text-align: center;
+    padding: 5px 14px; border: 1px solid var(--border); border-radius: 999px;
+    background: rgba(255,255,255,0.04); color: var(--text); font-size: 0.82rem;
+  }
+  .turn .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .turn .dot.b { background: #0c0c10; border: 1px solid #888; }
+  .turn .dot.w { background: #fff; border: 1px solid #bbb; }
+
+  .restart {
+    padding: 5px 14px; border: 1px solid rgba(255,154,154,0.5); border-radius: 999px;
+    background: transparent; color: #ff9a9a; font-size: 0.78rem; cursor: pointer; transition: .18s;
+  }
+  .restart:hover { background: rgba(255,154,154,0.12); }
+
+  /* ---------- 联机面板 ---------- */
+  .online-panel {
+    width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
+    background: rgba(9,20,46,0.5); backdrop-filter: blur(6px);
+  }
+  .op-row { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .op-btn {
+    padding: 8px 20px; border-radius: 999px; font-size: 0.84rem; cursor: pointer;
+    font-family: "Noto Serif SC", "SimSun", serif; letter-spacing: 0.06em; transition: .18s;
+  }
+  .op-btn.primary { border: none; background: linear-gradient(120deg, var(--gold-light), var(--gold) 60%, #b8902f); color: #1a1208; font-weight: 700; }
+  .op-btn.primary:hover { filter: brightness(1.06); }
+  .op-btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .op-btn.ghost:hover { border-color: var(--gold); color: var(--gold-light); }
+  .op-note { font-size: 0.76rem; color: var(--muted); }
+  .op-wait { font-size: 0.84rem; color: var(--text); }
+  .op-wait b { color: var(--gold-light); }
+  .op-code { font-size: 0.74rem; color: var(--muted); }
+  .op-code b { color: var(--gold-light); font-family: ui-monospace, Consolas, monospace; }
+  .op-vs { font-size: 0.84rem; color: var(--gold-light); }
+
+  /* ---------- 好友选择弹窗 ---------- */
+  .op-mask { position: fixed; inset: 0; z-index: 50; background: rgba(2,6,18,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .op-modal {
+    width: 100%; max-width: 360px; max-height: 76vh; overflow: auto;
+    background: rgba(9,20,46,0.98); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .op-modal-title { font-family: "Noto Serif SC", "SimSun", serif; font-size: 1rem; color: var(--gold-light); letter-spacing: 0.08em; margin-bottom: 12px; text-align: center; }
+  .op-friends { display: flex; flex-direction: column; gap: 6px; }
+  .op-friend {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+    border: 1px solid rgba(159,178,216,0.18); background: rgba(255,255,255,0.03);
+    cursor: pointer; transition: .15s;
+  }
+  .op-friend:hover { border-color: var(--gold); background: rgba(216,177,90,0.1); }
+  .op-f-avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 13px; color: var(--gold-light); background: linear-gradient(135deg, var(--blue), var(--ink-3)); }
+  .op-f-name { flex: 1; min-width: 0; font-size: 0.86rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .op-f-status { font-size: 0.72rem; color: var(--muted); flex: none; }
+  .op-f-empty { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 18px 0; }
+  .op-close { display: block; margin: 14px auto 0; padding: 7px 22px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); font-size: 0.8rem; cursor: pointer; }
+  .op-close:hover { color: var(--gold-light); border-color: var(--gold); }
+
+  /* ---------- 轻提示 ---------- */
+  .gtoast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(14px);
+    background: rgba(8,18,48,0.96); color: var(--gold-light); border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 12px; font-size: 0.82rem; z-index: 60;
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; max-width: 90%; text-align: center;
+  }
+  .gtoast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .board-wrap { width: 100%; max-width: 500px; }
+  #board { display: block; margin: 0 auto; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.5), 0 0 0 1px var(--border), 0 0 26px rgba(216,177,90,0.1); }
+  .tip { font-size: 0.7rem; color: var(--muted); opacity: 0.8; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="g-head">
+      <h1 class="g-title">五 子 棋</h1>
+      <p class="g-sub">庄园对弈 · 连成五子者胜</p>
+    </div>
+    <div class="bar">
+      <div class="mode-btns">
+        <button class="mode active" data-mode="pvp">双人对战</button>
+        <button class="mode" data-mode="ai">人机对战</button>
+        <button class="mode" data-mode="online">联机对战</button>
+      </div>
+      <div class="turn" id="turn">黑方回合</div>
+      <button class="restart" id="restart">↺ 重新开始</button>
+    </div>
+
+    <!-- 联机面板 -->
+    <div class="online-panel" id="onlinePanel" style="display:none">
+      <div class="op-row" id="opIdle">
+        <button class="op-btn primary" id="opInvite">邀请好友联机</button>
+        <span class="op-note">你执黑棋先行 · 实时对弈</span>
+      </div>
+      <div class="op-row" id="opInviting" style="display:none">
+        <span class="op-wait">已邀请 <b id="opInviteName"></b>，等待接受…</span>
+        <span class="op-code">房间号 <b id="opCode"></b></span>
+        <button class="op-btn ghost" id="opCancel">取消邀请</button>
+      </div>
+      <div class="op-row" id="opPlaying" style="display:none">
+        <span class="op-vs" id="opVs"></span>
+        <button class="op-btn ghost" id="opLeave">离开对局</button>
+      </div>
+    </div>
+
+    <div class="board-wrap" id="boardWrap">
+      <canvas id="board"></canvas>
+    </div>
+    <p class="tip">点击棋盘交叉点落子 · 黑方先行</p>
+  </div>
+
+  <!-- 好友选择弹窗 -->
+  <div class="op-mask" id="opMask" style="display:none">
+    <div class="op-modal">
+      <h3 class="op-modal-title">选择好友联机</h3>
+      <div class="op-friends" id="opFriends"></div>
+      <button class="op-close" id="opClose">关闭</button>
+    </div>
+  </div>
+
+  <div class="gtoast" id="gtoast"></div>
+
+<script src="sockjs.min.js"></script>
+<script src="stomp.umd.min.js"></script>
+<script>
+(function () {
+  const SIZE = 15;
+  const API_BASE = 'http://192.168.68.35:8081';
+  let CELL = 34, MARGIN = 26;
+  let board = [];
+  let current = 1; // 1 黑 / 2 白
+  let mode = 'pvp';
+  let gameOver = false;
+  let winner = 0;
+  let winLine = null;
+  let lastMove = null;
+  let hover = null;
+  let aiThinking = false;
+
+  // 联机状态
+  let stomp = null;
+  let wsConnected = false;
+  let onlineRoomId = null;
+  let myColor = 0; // 1=房主(黑) 2=受邀方(白)
+  let peerNickname = '';
+  let onlinePhase = 'idle'; // idle / inviting / playing
+
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('boardWrap');
+  const turnEl = document.getElementById('turn');
+  const dpr = () => window.devicePixelRatio || 1;
+
+  function inBoard(x, y) { return x >= 0 && x < SIZE && y >= 0 && y < SIZE; }
+
+  // ---------- 工具 ----------
+  function gomokuToken() {
+    try {
+      return window.sessionStorage.getItem('idv_token') || window.localStorage.getItem('idv_token') || '';
+    } catch (e) { return ''; }
+  }
+  let toastTimer = null;
+  function toast(msg) {
+    const el = document.getElementById('gtoast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+  async function gApi(path, options) {
+    const token = gomokuToken();
+    const opt = Object.assign({ method: 'GET' }, options || {});
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (opt.body) opt.body = JSON.stringify(opt.body);
+    let res;
+    try {
+      res = await fetch(API_BASE + path, { method: opt.method, headers, body: opt.body });
+    } catch (e) {
+      throw new Error('连接不上后端，请确认后端已启动');
+    }
+    const payload = await res.json().catch(() => null);
+    if (!payload) throw new Error('后端返回异常');
+    if (payload.code !== 200) throw new Error(payload.message || '操作失败');
+    return payload.data;
+  }
+  const JOIN_KEY = 'idv_gomoku_join';
+  function readJoinFlag() {
+    try { return localStorage.getItem(JOIN_KEY) || ''; } catch (e) { return ''; }
+  }
+  function clearJoinFlag() {
+    try { localStorage.removeItem(JOIN_KEY); } catch (e) { /* 忽略 */ }
+  }
+
+  // ---------- 棋盘 ----------
+  function init() {
+    board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+    current = 1; gameOver = false; winner = 0; winLine = null; lastMove = null; hover = null; aiThinking = false;
+    updateStatus();
+    layout();
+  }
+
+  function layout() {
+    const w = Math.min(wrap.clientWidth, 500);
+    CELL = (w - 2 * MARGIN) / (SIZE - 1);
+    const size = w;
+    canvas.width = Math.round(size * dpr());
+    canvas.height = Math.round(size * dpr());
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    ctx.setTransform(dpr(), 0, 0, dpr(), 0, 0);
+    draw();
+  }
+
+  function draw() {
+    const size = MARGIN * 2 + CELL * (SIZE - 1);
+    ctx.clearRect(0, 0, size, size);
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0, 'rgba(11,17,36,0.98)');
+    g.addColorStop(1, 'rgba(6,10,24,0.98)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.strokeStyle = 'rgba(216,177,90,0.5)';
+    ctx.lineWidth = 1;
+    const end = MARGIN + CELL * (SIZE - 1);
+    for (let i = 0; i < SIZE; i++) {
+      const p = MARGIN + i * CELL;
+      ctx.beginPath(); ctx.moveTo(MARGIN, p); ctx.lineTo(end, p); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p, MARGIN); ctx.lineTo(p, end); ctx.stroke();
+    }
+    const stars = [[3,3],[3,11],[11,3],[11,11],[7,7]];
+    ctx.fillStyle = '#d8b15a';
+    for (const [x, y] of stars) {
+      ctx.beginPath(); ctx.arc(MARGIN + x * CELL, MARGIN + y * CELL, 3.2, 0, Math.PI * 2); ctx.fill();
+    }
+    if (hover && !gameOver && board[hover[1]][hover[0]] === 0) drawStone(hover[0], hover[1], current, 0.38);
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+      if (board[y][x]) drawStone(x, y, board[y][x], 1);
+    }
+    if (lastMove) {
+      const [lx, ly] = lastMove;
+      ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(MARGIN + lx * CELL, MARGIN + ly * CELL, 4, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (winLine) {
+      ctx.strokeStyle = 'rgba(255,107,107,0.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(MARGIN + winLine[0][0] * CELL, MARGIN + winLine[0][1] * CELL);
+      ctx.lineTo(MARGIN + winLine[1][0] * CELL, MARGIN + winLine[1][1] * CELL);
+      ctx.stroke();
+    }
+  }
+
+  function drawStone(x, y, color, alpha) {
+    const cx = MARGIN + x * CELL, cy = MARGIN + y * CELL, r = CELL * 0.44;
+    ctx.save(); ctx.globalAlpha = alpha;
+    const g = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.1, cx, cy, r);
+    if (color === 1) { g.addColorStop(0, '#5a5a66'); g.addColorStop(1, '#0a0a0e'); }
+    else { g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#b9b3a8'); }
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = color === 1 ? 'rgba(0,0,0,0.8)' : 'rgba(216,177,90,0.6)';
+    ctx.lineWidth = 1; ctx.stroke();
+    ctx.restore();
+  }
+
+  function countLine(x, y, dx, dy, color) {
+    let c = 1;
+    let nx = x + dx, ny = y + dy;
+    while (inBoard(nx, ny) && board[ny][nx] === color) { c++; nx += dx; ny += dy; }
+    nx = x - dx; ny = y - dy;
+    while (inBoard(nx, ny) && board[ny][nx] === color) { c++; nx -= dx; ny -= dy; }
+    return c;
+  }
+
+  function checkWin(x, y, color) {
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    for (const [dx, dy] of dirs) {
+      let nx = x + dx, ny = y + dy;
+      while (inBoard(nx, ny) && board[ny][nx] === color) { nx += dx; ny += dy; }
+      const e1 = [nx - dx, ny - dy];
+      nx = x - dx; ny = y - dy;
+      while (inBoard(nx, ny) && board[ny][nx] === color) { nx -= dx; ny -= dy; }
+      const e0 = [nx + dx, ny + dy];
+      const len = Math.max(Math.abs(e1[0] - e0[0]), Math.abs(e1[1] - e0[1])) + 1;
+      if (len >= 5) { winLine = [e0, e1]; return true; }
+    }
+    return false;
+  }
+
+  function isFull() {
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) if (board[y][x] === 0) return false;
+    return true;
+  }
+
+  function openEnds(x, y, dx, dy, color) {
+    let nx = x + dx, ny = y + dy;
+    while (inBoard(nx, ny) && board[ny][nx] === color) { nx += dx; ny += dy; }
+    const e1 = inBoard(nx, ny) && board[ny][nx] === 0;
+    nx = x - dx; ny = y - dy;
+    while (inBoard(nx, ny) && board[ny][nx] === color) { nx -= dx; ny -= dy; }
+    const e2 = inBoard(nx, ny) && board[ny][nx] === 0;
+    return (e1 ? 1 : 0) + (e2 ? 1 : 0);
+  }
+
+  function evaluate(x, y, color) {
+    board[y][x] = color;
+    let score = 0;
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    for (const [dx, dy] of dirs) {
+      const c = countLine(x, y, dx, dy, color);
+      if (c >= 5) { score += 1000000; continue; }
+      const open = openEnds(x, y, dx, dy, color);
+      if (c === 4) score += open === 2 ? 100000 : (open === 1 ? 10000 : 0);
+      else if (c === 3) score += open === 2 ? 8000 : (open === 1 ? 900 : 150);
+      else if (c === 2) score += open === 2 ? 600 : (open === 1 ? 120 : 25);
+      else if (c === 1) score += 12;
+    }
+    board[y][x] = 0;
+    return score;
+  }
+
+  function hasNeighbor(x, y) {
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = x + dx, ny = y + dy;
+      if (inBoard(nx, ny) && board[ny][nx] !== 0) return true;
+    }
+    return false;
+  }
+
+  function aiMove() {
+    let best = null, bestScore = -Infinity;
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+      if (board[y][x] !== 0) continue;
+      if (!hasNeighbor(x, y)) continue;
+      const atk = evaluate(x, y, 2);
+      const def = evaluate(x, y, 1);
+      const s = atk + def * 0.95;
+      if (s > bestScore) { bestScore = s; best = [x, y]; }
+    }
+    return best || [7, 7];
+  }
+
+  function place(x, y) {
+    board[y][x] = current;
+    lastMove = [x, y];
+    if (checkWin(x, y, current)) { gameOver = true; winner = current; draw(); updateStatus(); return; }
+    if (isFull()) { gameOver = true; winner = 0; draw(); updateStatus(); return; }
+    current = current === 1 ? 2 : 1;
+    draw(); updateStatus();
+    if (mode === 'ai' && !gameOver && current === 2) {
+      aiThinking = true; updateStatus();
+      setTimeout(() => {
+        const mv = aiMove();
+        if (mv) place(mv[0], mv[1]);
+        aiThinking = false; updateStatus();
+      }, 260);
+    }
+  }
+
+  function updateStatus() {
+    if (mode === 'online') {
+      if (onlinePhase === 'inviting') { turnEl.textContent = '等待好友接受…'; return; }
+      if (onlinePhase === 'idle') { turnEl.textContent = '未在对局'; return; }
+      if (gameOver) {
+        if (winner === 1) turnEl.innerHTML = '<span class="dot b"></span>黑方获胜';
+        else if (winner === 2) turnEl.innerHTML = '<span class="dot w"></span>白方获胜';
+        else turnEl.textContent = '本局平局';
+        return;
+      }
+      const isMine = current === myColor;
+      turnEl.innerHTML = (current === 1 ? '<span class="dot b"></span>' : '<span class="dot w"></span>') + (isMine ? '轮到你落子' : '等待对方落子');
+      return;
+    }
+    if (gameOver) {
+      if (winner === 1) turnEl.innerHTML = '<span class="dot b"></span>黑方获胜';
+      else if (winner === 2) turnEl.innerHTML = '<span class="dot w"></span>白方获胜';
+      else turnEl.textContent = '本局平局';
+    } else if (aiThinking) {
+      turnEl.textContent = 'AI 思考中…';
+    } else {
+      turnEl.innerHTML = (current === 1 ? '<span class="dot b"></span>' : '<span class="dot w"></span>') + (current === 1 ? '黑方' : '白方') + '回合';
+    }
+  }
+
+  // ---------- 联机 WebSocket ----------
+  function connectWs(onReady) {
+    const token = gomokuToken();
+    if (!token) { toast('请先在主站登录后再联机'); return; }
+    if (stomp && wsConnected) { onReady && onReady(); return; }
+    let socket;
+    try { socket = new SockJS('/ws'); } catch (e) { toast('联机连接失败'); return; }
+    const c = Stomp.over(socket);
+    c.debug = function () {};
+    stomp = c;
+    c.connect({ Authorization: 'Bearer ' + token }, function () {
+      wsConnected = true;
+      c.subscribe('/user/queue/error', function (m) {
+        try { const d = JSON.parse(m.body); if (d && d.message) toast(d.message); } catch (e) {}
+      });
+      c.subscribe('/user/queue/gomoku', onGomokuP2P);
+      onReady && onReady();
+    }, function () {
+      wsConnected = false;
+      toast('联机连接失败，请确认后端已启动');
+    });
+  }
+  function disconnectWs() {
+    try { if (stomp && stomp.connected) stomp.disconnect(); } catch (e) {}
+    stomp = null; wsConnected = false;
+  }
+  function sendWs(dest, payload) {
+    if (!stomp || !wsConnected) { toast('未连接到联机服务'); return false; }
+    stomp.send('/app/gomoku/' + dest, {}, JSON.stringify(payload || {}));
+    return true;
+  }
+  function subscribeRoom(roomId) {
+    if (!stomp || !wsConnected) return;
+    stomp.subscribe('/topic/gomoku/' + roomId, function (m) {
+      let d; try { d = JSON.parse(m.body); } catch (e) { return; }
+      if (!d) return;
+      if (d.type === 'MOVE') applyRemoteMove(d);
+      else if (d.type === 'RESTART') { init(); toast('对方发起了新的一局'); }
+    });
+  }
+  function onGomokuP2P(m) {
+    let d; try { d = JSON.parse(m.body); } catch (e) { return; }
+    if (!d) return;
+    if (d.type === 'ACCEPTED') {
+      peerNickname = d.guestNickname || peerNickname;
+      onlinePhase = 'playing';
+      renderOnline();
+      toast('好友已接受，对局开始（你执黑）');
+    } else if (d.type === 'DECLINED') {
+      onlineRoomId = null; onlinePhase = 'idle';
+      renderOnline();
+      toast('对方拒绝了邀请');
+    } else if (d.type === 'PEER_LEFT') {
+      onlineRoomId = null; onlinePhase = 'idle'; myColor = 0;
+      init();
+      renderOnline();
+      toast(d.message || '对方离开了对局');
+    }
+  }
+  function applyRemoteMove(d) {
+    board[d.y][d.x] = d.color;
+    lastMove = [d.x, d.y];
+    current = d.nextColor;
+    if (checkWin(d.x, d.y, d.color)) { gameOver = true; winner = d.color; }
+    else if (isFull()) { gameOver = true; winner = 0; }
+    draw(); updateStatus();
+  }
+
+  // ---------- 联机流程 ----------
+  function showOnlinePanel(on) {
+    document.getElementById('onlinePanel').style.display = on ? 'flex' : 'none';
+  }
+  function renderOnline() {
+    const idle = document.getElementById('opIdle');
+    const inviting = document.getElementById('opInviting');
+    const playing = document.getElementById('opPlaying');
+    idle.style.display = onlinePhase === 'idle' ? '' : 'none';
+    inviting.style.display = onlinePhase === 'inviting' ? '' : 'none';
+    playing.style.display = onlinePhase === 'playing' ? '' : 'none';
+    if (onlinePhase === 'playing') {
+      const me = myColor === 1 ? '黑' : '白';
+      const opp = myColor === 1 ? '白' : '黑';
+      document.getElementById('opVs').textContent = `你执${me} · 对方执${opp}${peerNickname ? ' · ' + peerNickname : ''}`;
+    }
+    updateStatus();
+  }
+  function enterOnline() {
+    mode = 'online';
+    if (!gomokuToken()) { toast('请先登录后再联机'); showOnlinePanel(true); onlinePhase = 'idle'; renderOnline(); return; }
+    init();
+    showOnlinePanel(true);
+    onlinePhase = 'idle';
+    renderOnline();
+    connectWs(function () {
+      const join = readJoinFlag();
+      if (join) {
+        clearJoinFlag();
+        onlineJoinFromFlag(join);
+      }
+    });
+  }
+  function leaveOnline() {
+    if (mode === 'online' && onlineRoomId) {
+      try { sendWs('leave', { roomId: onlineRoomId }); } catch (e) {}
+    }
+    disconnectWs();
+    onlineRoomId = null; myColor = 0; peerNickname = ''; onlinePhase = 'idle';
+    showOnlinePanel(false);
+  }
+  async function openFriendPicker() {
+    document.getElementById('opFriends').innerHTML = '<div class="op-f-empty">加载好友列表…</div>';
+    document.getElementById('opMask').style.display = 'flex';
+    let friends = [];
+    try { friends = await gApi('/api/social/friends'); } catch (e) { toast(e.message || '获取好友失败'); }
+    const box = document.getElementById('opFriends');
+    box.innerHTML = '';
+    if (!friends || !friends.length) {
+      box.innerHTML = '<div class="op-f-empty">暂无好友，请先在「好友」页添加好友</div>';
+      return;
+    }
+    friends.forEach(f => {
+      const el = document.createElement('div');
+      el.className = 'op-friend';
+      const online = f.status !== 1;
+      el.innerHTML = `<span class="op-f-avatar">${(f.nickname || '友').charAt(0)}</span><span class="op-f-name">${f.nickname || '匿名'}</span><span class="op-f-status">${online ? '在线' : '离线'}</span>`;
+      el.onclick = () => { closeFriendPicker(); doInvite(f); };
+      box.appendChild(el);
+    });
+  }
+  function closeFriendPicker() {
+    document.getElementById('opMask').style.display = 'none';
+  }
+  async function doInvite(friend) {
+    try {
+      const data = await gApi('/api/gomoku/invite', { method: 'POST', body: { friendId: friend.id } });
+      onlineRoomId = data.roomId;
+      myColor = data.color || 1;
+      peerNickname = friend.nickname || '';
+      subscribeRoom(data.roomId);
+      onlinePhase = 'inviting';
+      document.getElementById('opInviteName').textContent = peerNickname;
+      document.getElementById('opCode').textContent = data.roomId;
+      renderOnline();
+      toast('已向「' + peerNickname + '」发出邀请');
+    } catch (e) {
+      toast(e.message || '邀请失败');
+    }
+  }
+  async function doCancel() {
+    if (!onlineRoomId) return;
+    try { await gApi('/api/gomoku/cancel', { method: 'POST', body: { roomId: onlineRoomId } }); } catch (e) {}
+    onlineRoomId = null; onlinePhase = 'idle';
+    renderOnline();
+  }
+  function doLeave() {
+    if (onlineRoomId) { try { sendWs('leave', { roomId: onlineRoomId }); } catch (e) {} }
+    onlineRoomId = null; myColor = 0; peerNickname = ''; onlinePhase = 'idle';
+    init();
+    renderOnline();
+    toast('已离开对局');
+  }
+  function doRestart() {
+    if (!onlineRoomId || onlinePhase !== 'playing') return;
+    sendWs('restart', { roomId: onlineRoomId });
+  }
+  function onlineJoinFromFlag(roomId) {
+    onlineRoomId = roomId;
+    myColor = 2;
+    subscribeRoom(roomId);
+    onlinePhase = 'playing';
+    peerNickname = '';
+    renderOnline();
+    gApi('/api/gomoku/room/' + roomId).then(room => {
+      if (room) {
+        peerNickname = room.hostNickname || '';
+        current = room.nextColor || 1;
+        (room.moves || []).forEach(mv => { if (mv && mv.length >= 3) board[mv[1]][mv[0]] = mv[2]; });
+        draw(); updateStatus(); renderOnline();
+      }
+    }).catch(() => {});
+  }
+  function onlinePlace(x, y) {
+    board[y][x] = current;
+    lastMove = [x, y];
+    current = current === 1 ? 2 : 1;
+    draw(); updateStatus();
+    sendWs('move', { roomId: onlineRoomId, x: x, y: y });
+  }
+
+  // ---------- 事件 ----------
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    const x = Math.round((px - MARGIN) / CELL), y = Math.round((py - MARGIN) / CELL);
+    if (!inBoard(x, y) || board[y][x] !== 0) return;
+
+    if (mode === 'online') {
+      if (onlinePhase !== 'playing' || gameOver) return;
+      if (current !== myColor) return;
+      onlinePlace(x, y);
+      return;
+    }
+    if (gameOver || aiThinking) return;
+    if (mode === 'ai' && current === 2) return;
+    place(x, y);
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    const x = Math.round((px - MARGIN) / CELL), y = Math.round((py - MARGIN) / CELL);
+    if (inBoard(x, y)) { if (!hover || hover[0] !== x || hover[1] !== y) { hover = [x, y]; draw(); } }
+    else if (hover) { hover = null; draw(); }
+  });
+  canvas.addEventListener('mouseleave', () => { hover = null; draw(); });
+
+  document.querySelectorAll('.mode').forEach((b) => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.mode').forEach((x) => x.classList.remove('active'));
+      b.classList.add('active');
+      const m = b.dataset.mode;
+      if (m === 'online') {
+        enterOnline();
+      } else {
+        leaveOnline();
+        mode = m;
+        init();
+      }
+    });
+  });
+  document.getElementById('restart').addEventListener('click', () => {
+    if (mode === 'online') { doRestart(); return; }
+    init();
+  });
+  document.getElementById('opInvite').addEventListener('click', openFriendPicker);
+  document.getElementById('opCancel').addEventListener('click', doCancel);
+  document.getElementById('opLeave').addEventListener('click', doLeave);
+  document.getElementById('opClose').addEventListener('click', closeFriendPicker);
+  document.getElementById('opMask').addEventListener('click', (e) => { if (e.target.id === 'opMask') closeFriendPicker(); });
+  window.addEventListener('resize', layout);
+
+  init();
+})();
+</script>
+</body>
+</html>
