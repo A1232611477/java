@@ -12,12 +12,25 @@
     </header>
 
     <main class="friends-main">
+      <!-- 横幅 -->
+      <section class="friends-hero">
+        <div class="hero-orn">✉</div>
+        <h1 class="hero-title">好 友 大 厅</h1>
+        <p class="hero-sub">加好友 · 私聊 · 联机组队</p>
+        <div class="hero-stats">
+          <span class="stat-chip"><b>{{ friends.length }}</b> 位好友</span>
+          <span class="stat-chip"><b>{{ onlineCount }}</b> 在线</span>
+          <span class="stat-chip" v-if="requests.length">待处理 <b>{{ requests.length }}</b> 条</span>
+        </div>
+      </section>
+
       <div class="layout">
         <!-- 左栏：好友 + 请求 -->
         <aside class="side">
           <!-- 添加好友（支持昵称模糊搜索 + UID） -->
           <div class="add-friend-wrap">
             <div class="add-friend">
+              <span class="add-ico">⌕</span>
               <input
                 v-model="addName"
                 class="inp"
@@ -46,17 +59,20 @@
 
           <!-- 待处理请求 -->
           <div v-if="requests.length" class="req-block">
-            <p class="side-title">好友请求 <span class="badge-count">{{ requests.length }}</span></p>
+            <p class="side-title"><span class="sec-mark">⚑</span> 好友请求 <span class="badge-count">{{ requests.length }}</span></p>
             <div v-for="r in requests" :key="r.id" class="req-item">
               <span class="req-avatar">{{ (r.nickname || '友').charAt(0) }}</span>
-              <span class="req-name">{{ r.nickname }}</span>
-              <button class="link-btn" @click="onAccept(r)">接受</button>
-              <button class="link-btn danger" @click="onReject(r)">拒绝</button>
+              <div class="req-mid">
+                <span class="req-name">{{ r.nickname }}</span>
+                <span class="req-sub">想和你成为好友</span>
+              </div>
+              <button class="mini-btn ok" @click="onAccept(r)">接受</button>
+              <button class="mini-btn no" @click="onReject(r)">拒绝</button>
             </div>
           </div>
 
           <!-- 好友列表 -->
-          <p class="side-title">我的好友 <span class="badge-count">{{ friends.length }}</span></p>
+          <p class="side-title"><span class="sec-mark">✦</span> 我的好友 <span class="badge-count">{{ friends.length }}</span></p>
           <div class="friend-list">
             <div
               v-for="f in friends"
@@ -65,9 +81,15 @@
               :class="{ active: activePeer?.id === f.id }"
               @click="openChat(f)"
             >
-              <span class="req-avatar">{{ (f.nickname || '友').charAt(0) }}</span>
-              <span class="req-name">{{ f.nickname }}</span>
-              <span v-if="f.status === 1" class="mini-off">离线</span>
+              <span class="avatar-wrap">
+                <span class="req-avatar">{{ (f.nickname || '友').charAt(0) }}</span>
+                <span class="online-dot" :class="{ off: f.status === 1 }"></span>
+              </span>
+              <div class="f-mid">
+                <span class="req-name">{{ f.nickname }}</span>
+                <span class="f-sub">{{ f.status === 1 ? '离线' : '在线' }}</span>
+              </div>
+              <button class="del-friend" @click.stop="onRemove(f)" title="删除好友">×</button>
             </div>
             <p v-if="!friends.length" class="empty">暂无好友，添加好友后即可聊天。</p>
           </div>
@@ -78,8 +100,14 @@
           <template v-if="activePeer">
             <header class="chat-head">
               <div class="chat-peer">
-                <span class="chat-avatar">{{ (activePeer.nickname || '友').charAt(0) }}</span>
-                <span class="chat-name">{{ activePeer.nickname }}</span>
+                <span class="avatar-wrap">
+                  <span class="chat-avatar">{{ (activePeer.nickname || '友').charAt(0) }}</span>
+                  <span class="online-dot" :class="{ off: activePeer.status === 1 }"></span>
+                </span>
+                <div class="cp-mid">
+                  <span class="chat-name">{{ activePeer.nickname }}</span>
+                  <span class="cp-sub">{{ activePeer.status === 1 ? '离线' : '在线' }}</span>
+                </div>
               </div>
               <div class="chat-actions">
                 <RouterLink to="/community" class="link-btn teamup" title="去联机组队">🎮 联机组队</RouterLink>
@@ -94,24 +122,29 @@
                   class="msg-row"
                   :class="{ mine: m.senderId === myId }"
                 >
+                  <span v-if="m.senderId !== myId" class="msg-avatar">{{ (activePeer.nickname || '友').charAt(0) }}</span>
                   <div class="msg-bubble">
                     <p class="msg-text">{{ m.content }}</p>
                     <span class="msg-time">{{ fmt(m.createdAt) }}</span>
                   </div>
                 </div>
               </div>
-              <p v-else class="empty">还没有消息，打个招呼吧～</p>
+              <div v-else class="chat-empty">
+                <p class="chat-empty-icon">✉</p>
+                <p>还没有消息，打个招呼吧～</p>
+              </div>
             </div>
 
             <footer class="chat-input">
-              <input v-model="draft" class="inp full" placeholder="输入消息…" @keyup.enter="onSend" />
-              <button class="btn-primary sm" :disabled="sending" @click="onSend">发送</button>
+              <input v-model="draft" class="inp full" placeholder="输入消息，回车发送…" @keyup.enter="onSend" />
+              <button class="btn-primary sm" :disabled="sending" @click="onSend">{{ sending ? '…' : '发送' }}</button>
             </footer>
           </template>
 
-          <div v-else class="chat-empty">
-            <p class="chat-empty-icon">✉</p>
+          <div v-else class="chat-empty idle">
+            <div class="idle-orn">✉</div>
             <p>选择左侧好友开始聊天</p>
+            <p class="idle-sub">实时私信 · 组队邀约 · 分享心得</p>
           </div>
         </section>
       </div>
@@ -151,6 +184,7 @@ const sending = ref(false)
 const chatBody = ref(null)
 
 const myId = computed(() => user.value?.id)
+const onlineCount = computed(() => friends.value.filter(f => f.status !== 1).length)
 
 // ---------- 好友 ----------
 async function loadFriends() {
@@ -337,58 +371,131 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .friends-page { position: relative; min-height: 100vh; color: var(--text); z-index: 1; }
+
+/* ---------- 顶栏 ---------- */
 .com-topbar { position: sticky; top: 0; z-index: 40; background: rgba(6, 12, 28, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.com-topbar::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
 .tb-inner { max-width: 1080px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
 .tb-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.tb-emblem { width: 34px; height: 34px; border-radius: 50%; background: var(--gold); color: #1a1208; display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+.tb-emblem { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, var(--gold-light), var(--gold) 70%); color: #1a1208; display: grid; place-items: center; font-weight: 800; font-size: 16px; box-shadow: 0 0 0 2px rgba(216,177,90,0.5), 0 0 16px rgba(216,177,90,0.4); }
 .tb-word { font-family: var(--font); color: var(--gold-light); font-size: 16px; letter-spacing: 1px; }
-.tb-back { height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 18px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; }
+.tb-back { height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 18px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: border-color .2s, color .2s; }
 .tb-back:hover { border-color: var(--gold); color: var(--gold-light); }
 
-.friends-main { max-width: 1080px; margin: 22px auto 60px; padding: 0 20px; }
-.layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+/* ---------- 横幅 ---------- */
+.friends-main { max-width: 1080px; margin: 24px auto 60px; padding: 0 20px; }
+.friends-hero {
+  position: relative; text-align: center; padding: 2.2rem 1.5rem 1.9rem; margin-bottom: 1.5rem;
+  border-radius: 18px; overflow: hidden;
+  background: linear-gradient(160deg, rgba(43,91,181,0.14), rgba(9,20,46,0.55) 55%, rgba(216,177,90,0.08));
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 44px rgba(2,6,18,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.friends-hero::before, .friends-hero::after {
+  content: ""; position: absolute; width: 26px; height: 26px; pointer-events: none;
+  border: 1.5px solid var(--gold); opacity: 0.85;
+}
+.friends-hero::before { top: 12px; left: 12px; border-right: none; border-bottom: none; border-top-left-radius: 10px; }
+.friends-hero::after { bottom: 12px; right: 12px; border-left: none; border-top: none; border-bottom-right-radius: 10px; }
+.hero-orn { font-size: 1.5rem; color: var(--gold); text-shadow: 0 0 14px rgba(216,177,90,0.7); animation: floaty 4s ease-in-out infinite; }
+.hero-title {
+  font-family: var(--font); font-weight: 700; font-size: 2.3rem; letter-spacing: 0.14em; margin: 0.35rem 0 0.45rem;
+  background: linear-gradient(110deg, #fff 10%, var(--blue-light) 45%, var(--gold-light) 80%);
+  background-size: 220% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 22px rgba(127,168,232,0.3)); animation: shimmer 6s linear infinite;
+}
+@keyframes shimmer { to { background-position: 220% center; } }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.hero-sub { color: var(--muted); font-size: 0.95rem; letter-spacing: 0.06em; }
+.hero-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; margin-top: 1.2rem; }
+.stat-chip {
+  padding: 0.34rem 0.95rem; border-radius: 999px; font-size: 0.82rem; color: #cdd9f2;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(159,178,216,0.25);
+}
+.stat-chip b { color: var(--gold-light); font-family: var(--font); font-weight: 700; }
+
+/* ---------- 布局 ---------- */
+.layout { display: grid; grid-template-columns: 310px 1fr; gap: 20px; align-items: start; }
 @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
 
 .side { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- 添加好友 ---------- */
 .add-friend-wrap { position: relative; }
-.add-friend { display: flex; gap: 8px; }
-.add-friend .inp { flex: 1; }
-.search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); max-height: 240px; overflow: auto; }
-.search-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; transition: background .15s; }
+.add-friend { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.add-friend:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(216,177,90,0.14); }
+.add-ico { color: var(--gold); font-size: 1.1rem; padding-left: 4px; }
+.add-friend .inp { flex: 1; background: transparent; border: none; box-shadow: none; padding: 0.45rem 0.2rem; }
+.add-friend .inp:focus { box-shadow: none; border-color: transparent; }
+.search-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; background: rgba(9,20,46,0.98); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); max-height: 240px; overflow: auto; padding: 6px; }
+.search-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background .15s; }
 .search-item:hover { background: rgba(216,177,90,0.1); }
 .mini-uid { font-size: 11px; color: var(--muted); margin-left: auto; }
+.mini-off { font-size: 11px; color: var(--muted); }
 .search-empty { font-size: 12px; color: var(--muted); padding: 6px 2px; }
-.side-title { font-size: 14px; color: var(--gold-light); font-weight: 700; margin-bottom: 8px; }
-.badge-count { font-size: 12px; color: var(--gold); margin-left: 4px; }
 
-.req-block { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-.req-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
-.req-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-.req-name { flex: 1; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---------- 侧栏标题 ---------- */
+.side-title { display: flex; align-items: center; gap: 0.4rem; font-family: var(--font); font-size: 14px; color: var(--gold-light); letter-spacing: 1px; font-weight: 700; margin-bottom: 8px; }
+.sec-mark { color: var(--gold); text-shadow: 0 0 10px rgba(216,177,90,0.6); font-size: 13px; }
+.badge-count { font-size: 12px; color: var(--gold); margin-left: 2px; }
 
-.friend-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 460px; overflow: auto; }
-.friend-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+/* ---------- 好友请求 ---------- */
+.req-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+.req-item { display: flex; align-items: center; gap: 9px; padding: 7px 0; }
+.req-item + .req-item { border-top: 1px dashed rgba(159,178,216,0.14); }
+.req-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(127,168,232,0.25); }
+.req-mid { flex: 1; min-width: 0; }
+.req-name { display: block; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.req-sub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.mini-btn { flex: none; border-radius: 8px; font-size: 12px; padding: 4px 12px; cursor: pointer; transition: filter .2s, background .2s; }
+.mini-btn.ok { border: none; background: linear-gradient(120deg, var(--gold-light), var(--gold) 60%, #b8902f); color: #07101f; font-weight: 700; }
+.mini-btn.ok:hover { filter: brightness(1.06); }
+.mini-btn.no { background: transparent; border: 1px solid rgba(159,178,216,0.32); color: #cdd9f2; }
+.mini-btn.no:hover { border-color: #ff9a9a; color: #ffc2c2; }
+
+/* ---------- 好友列表 ---------- */
+.friend-list { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px; max-height: 480px; overflow: auto; }
+.friend-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background .15s; position: relative; }
 .friend-item:hover { background: rgba(216,177,90,0.08); }
 .friend-item.active { background: rgba(216,177,90,0.16); }
-.mini-off { font-size: 11px; color: var(--muted); }
+.friend-item.active::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; border-radius: 3px; background: var(--gold); }
+.avatar-wrap { position: relative; flex: none; }
+.online-dot { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border-radius: 50%; background: #58d68d; border: 2px solid var(--ink-2); box-shadow: 0 0 8px rgba(88,214,141,0.7); }
+.online-dot.off { background: #5a6b8c; box-shadow: none; }
+.f-mid { flex: 1; min-width: 0; }
+.f-sub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.del-friend { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(255,154,154,0.4); background: transparent; color: #ff9a9a; font-size: 14px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity .15s, background .15s; }
+.friend-item:hover .del-friend { opacity: 1; }
+.del-friend:hover { background: rgba(255,154,154,0.15); }
 
-.chat-panel { display: flex; flex-direction: column; height: 560px; padding: 0; overflow: hidden; }
-.chat-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
-.chat-peer { display: flex; align-items: center; gap: 10px; }
-.chat-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light); display: grid; place-items: center; font-weight: 700; }
+/* ---------- 聊天面板 ---------- */
+.chat-panel { display: flex; flex-direction: column; height: 600px; padding: 0; overflow: hidden; }
+.chat-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(43,91,181,0.08), transparent); }
+.chat-peer { display: flex; align-items: center; gap: 11px; }
+.chat-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light); display: grid; place-items: center; font-weight: 700; font-size: 16px; box-shadow: 0 0 0 2px rgba(127,168,232,0.25); }
+.cp-mid { display: flex; flex-direction: column; }
 .chat-name { font-size: 15px; font-weight: 700; }
-.teamup { margin-right: 0; }
-.chat-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
-.msg-list { display: flex; flex-direction: column; gap: 10px; }
-.msg-row { display: flex; }
+.cp-sub { font-size: 11px; color: var(--muted); }
+.cp-sub.on { color: #7fe0ac; }
+.teamup { margin-right: 0; text-decoration: none; }
+.chat-body { flex: 1; overflow-y: auto; padding: 18px; }
+.msg-list { display: flex; flex-direction: column; gap: 12px; }
+.msg-row { display: flex; align-items: flex-end; gap: 9px; }
 .msg-row.mine { justify-content: flex-end; }
-.msg-bubble { max-width: 70%; background: rgba(43,91,181,0.24); border: 1px solid rgba(127,168,232,0.28); padding: 8px 12px; border-radius: 12px; }
-.msg-row.mine .msg-bubble { background: rgba(216,177,90,0.16); border-color: rgba(216,177,90,0.4); }
-.msg-text { font-size: 14px; color: var(--text); word-break: break-word; }
-.msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; display: block; }
-.chat-input { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); }
+.msg-avatar { flex: none; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.msg-bubble { position: relative; max-width: 68%; background: rgba(43,91,181,0.22); border: 1px solid rgba(127,168,232,0.28); padding: 9px 13px; border-radius: 16px; }
+.msg-row:not(.mine) .msg-bubble { border-bottom-left-radius: 5px; }
+.msg-row.mine .msg-bubble { background: linear-gradient(135deg, rgba(216,177,90,0.24), rgba(216,177,90,0.12)); border-color: rgba(216,177,90,0.4); border-bottom-right-radius: 5px; }
+.msg-text { font-size: 14px; color: var(--text); word-break: break-word; white-space: pre-wrap; }
+.msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; display: block; opacity: 0.8; }
+
+.chat-input { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); background: rgba(4,8,26,0.3); }
 .chat-input .inp { flex: 1; }
-.chat-empty { flex: 1; display: grid; place-items: center; color: var(--muted); }
-.chat-empty-icon { font-size: 40px; margin-bottom: 10px; }
+
+.chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--muted); text-align: center; padding: 1rem; }
+.chat-empty-icon { font-size: 44px; color: var(--gold); text-shadow: 0 0 18px rgba(216,177,90,0.5); }
+.idle-orn { font-size: 52px; color: var(--gold); text-shadow: 0 0 24px rgba(216,177,90,0.6); animation: floaty 4s ease-in-out infinite; }
+.idle-sub { font-size: 0.8rem; opacity: 0.7; }
+
 .empty { text-align: center; color: var(--muted); padding: 20px 0; font-size: 13px; }
 </style>

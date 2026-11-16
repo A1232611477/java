@@ -5,10 +5,12 @@
     </transition>
   </router-view>
   <Toast />
+  <GomokuInviteListener />
 </template>
 
 <script setup>
 import Toast from './components/Toast.vue'
+import GomokuInviteListener from './components/GomokuInviteListener.vue'
 </script>
 
 <style>
