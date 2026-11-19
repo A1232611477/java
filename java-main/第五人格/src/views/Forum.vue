@@ -14,6 +14,7 @@
     <main class="forum-main">
       <!-- 论坛横幅 -->
       <section class="forum-hero">
+        <div class="hero-glow"></div>
         <div class="hero-orn">✦</div>
         <h1 class="hero-title">玩 家 论 坛</h1>
         <p class="hero-sub">分享心得 · 招募队友 · 闲聊庄园</p>
@@ -59,8 +60,8 @@
             <div v-if="loading" class="empty">加载中…</div>
             <div v-else class="post-list">
               <article v-for="(p, i) in posts" :key="p.id" class="post-card" @click="openDetail(p)">
-                <div class="pc-rank" :class="{ top: rank(p, i) <= 3 }">{{ pad(rank(p, i)) }}</div>
-                <span class="pc-avatar">{{ (p.authorNickname || '友').charAt(0) }}</span>
+                <div class="pc-rank" :class="rankClass(p, i)">{{ pad(rank(p, i)) }}</div>
+                <span class="pc-avatar" :class="'av-' + avatarTone(p)">{{ (p.authorNickname || '友').charAt(0) }}</span>
                 <div class="pc-meta">
                   <p class="pc-title">{{ p.title }}</p>
                   <p class="pc-info">
@@ -68,9 +69,13 @@
                     <span class="dot">·</span>
                     <span>{{ timeAgo(p.createdAt) }}</span>
                     <span class="dot">·</span>
-                    <span>#{{ p.id }}</span>
+                    <span class="pc-id">#{{ p.id }}</span>
                   </p>
                   <p v-if="p.content" class="pc-desc">{{ p.content }}</p>
+                  <div class="pc-tags">
+                    <span class="pc-tag">{{ postTag(p) }}</span>
+                    <span v-if="p.content" class="pc-tag len">{{ p.content.length }} 字</span>
+                  </div>
                 </div>
                 <button
                   v-if="p.authorId === myId"
@@ -98,13 +103,11 @@
 
         <!-- 右侧边栏 -->
         <aside class="forum-side">
-          <section class="side-card">
-            <h3 class="side-title"><span class="sec-mark">⚑</span> 论坛公告</h3>
-            <ul class="side-list">
-              <li>请友善交流，尊重每一位玩家。</li>
-              <li>禁止发布广告、外挂、代练信息。</li>
-              <li>违规内容将视情节删除或封禁。</li>
-            </ul>
+          <section class="side-card hot-topics">
+            <h3 class="side-title"><span class="sec-mark">✦</span> 热门话题</h3>
+            <div class="topic-cloud">
+              <span v-for="t in topics" :key="t" class="topic-chip">{{ t }}</span>
+            </div>
           </section>
 
           <section class="side-card">
@@ -119,6 +122,15 @@
           </section>
 
           <section class="side-card">
+            <h3 class="side-title"><span class="sec-mark">⚑</span> 论坛公告</h3>
+            <ul class="side-list">
+              <li>请友善交流，尊重每一位玩家。</li>
+              <li>禁止发布广告、外挂、代练信息。</li>
+              <li>违规内容将视情节删除或封禁。</li>
+            </ul>
+          </section>
+
+          <section class="side-card about-manor">
             <h3 class="side-title"><span class="sec-mark">✧</span> 关于庄园</h3>
             <p class="side-text">第五人格 —— 非对称对抗竞技手游。在迷雾笼罩的庄园里，选择你的阵营，书写属于你的故事。</p>
           </section>
@@ -135,14 +147,14 @@
             <button class="modal-close" @click="detailOpen = false">×</button>
           </div>
           <div class="modal-body">
-            <p class="detail-meta">
+            <div class="detail-author">
               <span class="dm-avatar">{{ (detail?.authorNickname || '友').charAt(0) }}</span>
-              <span>{{ detail?.authorNickname || '匿名玩家' }}</span>
-              <span class="dot">·</span>
-              <span>{{ fmt(detail?.createdAt) }}</span>
-              <span class="dot">·</span>
-              <span>#{{ detail?.id }}</span>
-            </p>
+              <div class="da-meta">
+                <span class="da-name">{{ detail?.authorNickname || '匿名玩家' }}</span>
+                <span class="da-sub">{{ fmt(detail?.createdAt) }} · #{{ detail?.id }}</span>
+              </div>
+            </div>
+            <div class="detail-divider"></div>
             <div class="detail-content">{{ detail?.content || '（无正文）' }}</div>
           </div>
         </div>
@@ -187,6 +199,37 @@ const pageList = computed(() => {
   for (let i = start; i <= end; i++) arr.push(i)
   return arr
 })
+
+// 热门话题（静态展示，增强氛围）
+const topics = ['求生者攻略', '监管者心得', '庄园剧情', '组队招募', '角色解析', '排位经验', '新手入门', '赛事讨论']
+
+// 根据排名给序号不同的样式（金/银/铜）
+function rankClass(p, i) {
+  const r = rank(p, i)
+  if (r === 1) return 'top g1'
+  if (r === 2) return 'top g2'
+  if (r === 3) return 'top g3'
+  return ''
+}
+
+// 根据作者 id 生成稳定的头像色调（避免都是同一个颜色）
+function avatarTone(p) {
+  const n = (p.authorId || 0) % 5
+  return n
+}
+
+// 根据内容关键词给帖子一个分类标签
+function postTag(p) {
+  const text = (p.title + ' ' + (p.content || '')).toLowerCase()
+  if (/招募|组队|求|队友|开黑|车队/.test(text)) return '组队招募'
+  if (/监管|屠夫|追|守尸|挂/.test(text)) return '监管者'
+  if (/求生|修机|溜|牵制|破译/.test(text)) return '求生者'
+  if (/剧情|故事|角色|背景|设定/.test(text)) return '剧情解析'
+  if (/攻略|心得|技巧|打法|教学/.test(text)) return '攻略心得'
+  if (/排位|上分|段位|赛季/.test(text)) return '排位冲分'
+  if (/问|求助|怎么|为什么|新手|萌新/.test(text)) return '求助讨论'
+  return '闲聊庄园'
+}
 
 function fmt(s) {
   if (!s) return '—'
@@ -295,6 +338,15 @@ onMounted(loadList)
   border: 1px solid var(--border);
   box-shadow: 0 16px 44px rgba(2,6,18,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
 }
+.hero-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(46% 60% at 50% 0%, rgba(216,177,90,0.16), transparent 70%),
+    radial-gradient(40% 50% at 18% 100%, rgba(43,91,181,0.18), transparent 70%),
+    radial-gradient(40% 50% at 82% 100%, rgba(111,155,224,0.14), transparent 70%);
+  animation: heroGlow 7s ease-in-out infinite alternate;
+}
+@keyframes heroGlow { from { opacity: 0.7; } to { opacity: 1; } }
 .forum-hero::before, .forum-hero::after {
   content: ""; position: absolute; width: 26px; height: 26px; pointer-events: none;
   border: 1.5px solid var(--gold); opacity: 0.85;
@@ -348,46 +400,83 @@ textarea.inp { resize: vertical; min-height: 96px; line-height: 1.6; }
 .post-list { display: flex; flex-direction: column; gap: 12px; }
 
 .post-card {
-  position: relative; display: flex; align-items: flex-start; gap: 13px;
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-  padding: 16px 18px 16px 12px; backdrop-filter: blur(6px); cursor: pointer;
-  transition: transform .18s, border-color .2s, box-shadow .2s, background .2s;
+  position: relative; display: flex; align-items: flex-start; gap: 14px;
+  background: linear-gradient(160deg, rgba(13,27,60,0.62), rgba(9,20,46,0.45));
+  border: 1px solid rgba(159,178,216,0.16); border-radius: 16px;
+  padding: 17px 18px 16px 14px; backdrop-filter: blur(8px); cursor: pointer;
+  transition: transform .2s, border-color .25s, box-shadow .25s, background .25s;
 }
 .post-card::before {
-  content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px;
-  border-radius: 14px 0 0 14px;
+  content: ""; position: absolute; top: 14px; bottom: 14px; left: 0; width: 3px;
+  border-radius: 0 6px 6px 0;
   background: linear-gradient(180deg, var(--gold), transparent);
-  opacity: 0; transition: opacity .2s;
+  opacity: 0; transition: opacity .25s;
+}
+.post-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(216,177,90,0.10), transparent 55%);
+  opacity: 0; transition: opacity .25s;
 }
 .post-card:hover {
-  border-color: var(--gold); transform: translateY(-2px);
-  box-shadow: 0 14px 34px rgba(2,6,18,0.55), 0 0 24px rgba(216,177,90,0.16);
+  border-color: var(--gold); transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(2,6,18,0.6), 0 0 30px rgba(216,177,90,0.18);
 }
-.post-card:hover::before { opacity: 1; }
+.post-card:hover::before, .post-card:hover::after { opacity: 1; }
 
 .pc-rank {
-  flex: none; width: 30px; padding-top: 9px; text-align: center;
-  font-family: var(--font); font-size: 0.85rem; color: var(--muted); opacity: 0.7;
+  flex: none; width: 38px; height: 38px; margin-top: 2px;
+  display: grid; place-items: center; border-radius: 10px;
+  font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+  color: var(--muted); background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(159,178,216,0.2);
 }
-.pc-rank.top { color: var(--gold-light); opacity: 1; text-shadow: 0 0 10px rgba(216,177,90,0.5); }
+.pc-rank.top { color: var(--gold-light); border-color: rgba(216,177,90,0.5); background: rgba(216,177,90,0.1); text-shadow: 0 0 12px rgba(216,177,90,0.5); }
+.pc-rank.g1 {
+  color: #07101f; border-color: transparent;
+  background: linear-gradient(135deg, #ffe9a8, #d8b15a 60%, #b8902f);
+  box-shadow: 0 4px 14px rgba(216,177,90,0.45);
+}
+.pc-rank.g2 {
+  color: #f0f4ff; border-color: rgba(180,200,230,0.5);
+  background: linear-gradient(135deg, #cdd7e6, #8fa2bd 70%);
+  box-shadow: 0 4px 12px rgba(160,180,210,0.35);
+}
+.pc-rank.g3 {
+  color: #fff5e6; border-color: rgba(210,150,90,0.5);
+  background: linear-gradient(135deg, #e8b98a, #b5764a 70%);
+  box-shadow: 0 4px 12px rgba(200,140,90,0.35);
+}
 
 .pc-avatar {
-  flex: none; width: 42px; height: 42px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--blue), var(--ink-3)); color: var(--gold-light);
-  display: grid; place-items: center; font-weight: 700; font-size: 16px;
-  box-shadow: 0 0 0 2px rgba(127,168,232,0.3), 0 6px 16px rgba(43,91,181,0.3);
+  flex: none; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 700; font-size: 17px; color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.12), 0 6px 16px rgba(2,6,18,0.45);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
+.pc-avatar.av-0 { background: linear-gradient(135deg, #7fa8e8, #2b5bb5); }
+.pc-avatar.av-1 { background: linear-gradient(135deg, #f6e1a4, #c98f3a); color: #3a2a08; }
+.pc-avatar.av-2 { background: linear-gradient(135deg, #9fe6c4, #3a9d78); }
+.pc-avatar.av-3 { background: linear-gradient(135deg, #e8a0c0, #b54a7a); }
+.pc-avatar.av-4 { background: linear-gradient(135deg, #b7a6f0, #6a54c9); }
+
 .pc-meta { flex: 1; min-width: 0; }
 .pc-title { font-size: 15.5px; font-weight: 700; color: var(--text); line-height: 1.4; }
 .post-card:hover .pc-title { color: var(--gold-light); }
-.pc-info { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.pc-author { color: var(--blue-light); }
+.pc-info { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pc-author { color: var(--blue-light); font-weight: 600; }
+.pc-id { font-family: ui-monospace, Consolas, monospace; opacity: 0.7; }
 .dot { opacity: 0.5; }
 .pc-desc {
-  font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.65;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: 13px; color: var(--muted); margin-top: 9px; line-height: 1.65;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   word-break: break-word;
 }
+.pc-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.pc-tag {
+  font-size: 11px; padding: 2px 9px; border-radius: 999px; letter-spacing: 0.02em;
+  background: rgba(43,91,181,0.18); border: 1px solid rgba(127,168,232,0.3); color: var(--blue-light);
+}
+.pc-tag.len { background: rgba(255,255,255,0.04); border: 1px solid rgba(159,178,216,0.22); color: var(--muted); }
 .post-del {
   flex: none; background: transparent; border: 1px solid rgba(255,154,154,0.4); color: #ff9a9a;
   border-radius: 8px; font-size: 12px; padding: 3px 10px; cursor: pointer; margin-top: 4px;
@@ -413,30 +502,62 @@ textarea.inp { resize: vertical; min-height: 96px; line-height: 1.6; }
 /* ---------- 侧边栏 ---------- */
 .forum-side { display: flex; flex-direction: column; gap: 1.2rem; }
 .side-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-  padding: 16px 18px; backdrop-filter: blur(6px);
+  position: relative;
+  background: linear-gradient(160deg, rgba(13,27,60,0.55), rgba(9,20,46,0.42));
+  border: 1px solid rgba(159,178,216,0.16); border-radius: 16px;
+  padding: 17px 18px; backdrop-filter: blur(8px);
+  overflow: hidden;
 }
+.side-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(216,177,90,0.6), transparent);
+  opacity: 0.6;
+}
+.hot-topics::before { background: linear-gradient(90deg, transparent, rgba(127,168,232,0.6), transparent); }
 .side-title { font-family: var(--font); font-size: 15px; color: var(--gold-light); letter-spacing: 1.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 0.4rem; }
+
+/* 话题云 */
+.topic-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
+.topic-chip {
+  font-size: 12px; padding: 4px 11px; border-radius: 999px; cursor: pointer;
+  color: #cdd9f2; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(159,178,216,0.22); transition: all .2s;
+}
+.topic-chip:hover {
+  color: var(--gold-light); border-color: var(--gold);
+  background: rgba(216,177,90,0.12); box-shadow: 0 0 14px rgba(216,177,90,0.22);
+  transform: translateY(-1px);
+}
+
 .side-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .side-list li { position: relative; padding-left: 14px; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
 .side-list li::before { content: ""; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
-.side-posts { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.side-post { display: flex; align-items: center; gap: 8px; padding: 7px 4px; cursor: pointer; border-radius: 8px; transition: background .2s; }
-.side-post:hover { background: rgba(216,177,90,0.08); }
-.sp-dot { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--blue-light); }
+.side-posts { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.side-post { display: flex; align-items: center; gap: 8px; padding: 7px 6px; cursor: pointer; border-radius: 8px; transition: background .2s, transform .2s; }
+.side-post:hover { background: rgba(216,177,90,0.08); transform: translateX(2px); }
+.sp-dot { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--blue-light); box-shadow: 0 0 6px rgba(127,168,232,0.6); }
 .sp-title { flex: 1; min-width: 0; font-size: 0.84rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .side-post:hover .sp-title { color: var(--gold-light); }
 .side-empty { color: var(--muted); font-size: 0.82rem; }
 .side-text { color: var(--muted); font-size: 0.82rem; line-height: 1.7; }
+.about-manor::after {
+  content: "✦"; position: absolute; right: 14px; bottom: 10px; font-size: 1.6rem;
+  color: rgba(216,177,90,0.18); pointer-events: none;
+}
 
 /* ---------- 弹窗 ---------- */
-.detail-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.detail-author { display: flex; align-items: center; gap: 12px; }
 .dm-avatar {
-  width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center;
-  font-size: 12px; font-weight: 700; color: var(--ink-1);
-  background: radial-gradient(circle at 32% 28%, var(--gold-light), var(--gold) 70%);
+  flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 18px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold) 70%, #b8902f);
+  color: #3a2a08; box-shadow: 0 0 0 2px rgba(216,177,90,0.4), 0 6px 16px rgba(216,177,90,0.3);
 }
-.detail-content { color: var(--text); font-size: 14px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+.da-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.da-name { font-family: var(--font); font-size: 1.05rem; font-weight: 700; color: var(--gold-light); }
+.da-sub { font-size: 12px; color: var(--muted); }
+.detail-divider { height: 1px; margin: 14px 0; background: linear-gradient(90deg, rgba(216,177,90,0.4), transparent); }
+.detail-content { color: var(--text); font-size: 14px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 920px) {

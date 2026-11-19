@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,8 +42,98 @@ public class GameRoomService {
     /** roomId -> 房主最近一次广播的权威状态 */
     private final Map<String, Object> authority = new ConcurrentHashMap<>();
 
+    /** roomId -> 待处理的邀请（房主邀请好友后、好友尚未接受时） */
+    private final Map<String, GameInvite> invites = new ConcurrentHashMap<>();
+
     public GameRoomService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
+    }
+
+    // ---------- 好友邀请联机 ----------
+
+    /** 发起邀请：创建房间（自己=房主），点对点通知受邀好友，返回 roomId */
+    public Map<String, Object> inviteFriend(Long userId, String nickname, Long friendId) {
+        if (friendId == null || friendId.equals(userId)) {
+            throw new BizException(400, "请选择要邀请的好友");
+        }
+        String roomId = createRoom(userId, nickname);
+
+        Map<String, Object> invite = new HashMap<>();
+        invite.put("type", "INVITE");
+        invite.put("roomId", roomId);
+        invite.put("fromUserId", userId);
+        invite.put("fromNickname", nickname);
+        messagingTemplate.convertAndSendToUser(String.valueOf(friendId), "/queue/game", invite);
+
+        invites.put(roomId, new GameInvite(roomId, userId, nickname, friendId));
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("roomId", roomId);
+        data.put("myUserId", userId);
+        return data;
+    }
+
+    /** 好友接受邀请：加入房间，通知房主 */
+    public Map<String, Object> acceptInvite(Long userId, String nickname, String roomId) {
+        GameInvite inv = invites.get(roomId);
+        if (inv == null || !userId.equals(inv.guestId)) {
+            throw new BizException("邀请已失效或你不是受邀玩家");
+        }
+        joinRoom(userId, nickname, roomId);
+
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("type", "ACCEPTED");
+        msg.put("roomId", roomId);
+        msg.put("guestNickname", nickname);
+        messagingTemplate.convertAndSendToUser(String.valueOf(inv.hostId), "/queue/game", msg);
+        invites.remove(roomId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("roomId", roomId);
+        data.put("myUserId", userId);
+        return data;
+    }
+
+    /** 好友拒绝邀请：通知房主 */
+    public void declineInvite(Long userId, String roomId) {
+        GameInvite inv = invites.get(roomId);
+        if (inv == null || !userId.equals(inv.guestId)) return;
+        invites.remove(roomId);
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("type", "DECLINED");
+        msg.put("roomId", roomId);
+        msg.put("guestNickname", inv.guestNickname);
+        messagingTemplate.convertAndSendToUser(String.valueOf(inv.hostId), "/queue/game", msg);
+    }
+
+    /** 房主取消邀请：通知好友；若房间已无其他人则解散 */
+    public void cancelInvite(Long userId, String roomId) {
+        GameInvite inv = invites.get(roomId);
+        if (inv == null || !userId.equals(inv.hostId)) return;
+        invites.remove(roomId);
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("type", "CANCELLED");
+        msg.put("roomId", roomId);
+        messagingTemplate.convertAndSendToUser(String.valueOf(inv.guestId), "/queue/game", msg);
+        // 房间内只剩房主本人时解散
+        Map<Long, GamePlayerVO> players = rooms.get(roomId);
+        if (players != null && players.size() <= 1) {
+            rooms.remove(roomId);
+        }
+    }
+
+    /** 查询当前用户尚未处理的邀请（没有返回 null） */
+    public Map<String, Object> pendingInvite(Long userId) {
+        for (GameInvite inv : invites.values()) {
+            if (userId.equals(inv.guestId)) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("roomId", inv.roomId);
+                data.put("fromUserId", inv.hostId);
+                data.put("fromNickname", inv.hostNickname);
+                return data;
+            }
+        }
+        return null;
     }
 
     /** 创建房间，返回房间号；创建者自动成为房主 */
@@ -242,5 +333,21 @@ public class GameRoomService {
 
     private String genRoomId() {
         return String.format("%06d", RANDOM.nextInt(1_000_000));
+    }
+
+    /** 待处理的好友邀请 */
+    private static final class GameInvite {
+        final String roomId;
+        final Long hostId;
+        final String hostNickname;
+        final Long guestId;
+        String guestNickname;
+
+        GameInvite(String roomId, Long hostId, String hostNickname, Long guestId) {
+            this.roomId = roomId;
+            this.hostId = hostId;
+            this.hostNickname = hostNickname;
+            this.guestId = guestId;
+        }
     }
 }

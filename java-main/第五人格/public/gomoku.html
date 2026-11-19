@@ -237,11 +237,18 @@
     return payload.data;
   }
   const JOIN_KEY = 'idv_gomoku_join';
+  const HOST_KEY = 'idv_gomoku_host';
   function readJoinFlag() {
     try { return localStorage.getItem(JOIN_KEY) || ''; } catch (e) { return ''; }
   }
   function clearJoinFlag() {
     try { localStorage.removeItem(JOIN_KEY); } catch (e) { /* 忽略 */ }
+  }
+  function readHostFlag() {
+    try { return localStorage.getItem(HOST_KEY) || ''; } catch (e) { return ''; }
+  }
+  function clearHostFlag() {
+    try { localStorage.removeItem(HOST_KEY); } catch (e) { /* 忽略 */ }
   }
 
   // ---------- 棋盘 ----------
@@ -535,6 +542,12 @@
       if (join) {
         clearJoinFlag();
         onlineJoinFromFlag(join);
+        return;
+      }
+      const host = readHostFlag();
+      if (host) {
+        clearHostFlag();
+        onlineHostFromFlag(host);
       }
     });
   }
@@ -618,6 +631,17 @@
       }
     }).catch(() => {});
   }
+  // 房主从好友页发起邀请后跳转过来：进入等待好友接受的状态
+  function onlineHostFromFlag(roomId) {
+    onlineRoomId = roomId;
+    myColor = 1;
+    subscribeRoom(roomId);
+    onlinePhase = 'inviting';
+    document.getElementById('opInviteName').textContent = '好友';
+    document.getElementById('opCode').textContent = roomId;
+    renderOnline();
+    toast('已发出邀请，等待好友接受…');
+  }
   function onlinePlace(x, y) {
     board[y][x] = current;
     lastMove = [x, y];
@@ -679,6 +703,13 @@
   window.addEventListener('resize', layout);
 
   init();
+
+  // 从好友页发起邀请，或被邀请接受后跳转过来时，自动进入联机模式
+  if (readHostFlag() || readJoinFlag()) {
+    document.querySelectorAll('.mode').forEach((x) => x.classList.remove('active'));
+    document.querySelector('.mode[data-mode="online"]').classList.add('active');
+    enterOnline();
+  }
 })();
 </script>
 </body>

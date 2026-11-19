@@ -6,11 +6,13 @@
   </router-view>
   <Toast />
   <GomokuInviteListener />
+  <EscapeInviteListener />
 </template>
 
 <script setup>
 import Toast from './components/Toast.vue'
 import GomokuInviteListener from './components/GomokuInviteListener.vue'
+import EscapeInviteListener from './components/EscapeInviteListener.vue'
 </script>
 
 <style>

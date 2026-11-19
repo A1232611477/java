@@ -271,7 +271,51 @@ const ROLES = [
       toast('先知召唤「役鸟」护体！');
       return true;
     } },
+  { id:'perfumer', name:'调香师',     glyph:'❀',  tag:'回溯', hp:2, speed:3.1,
+    skill:'忘忧之香', skillDesc:'喷洒香水标记位置，再次使用可回溯并恢复生命', cd:16, color:'#e8a0a0',
+    _mark:null,
+    useSkill(){ // 标记或回溯
+      if(!this._mark){
+        this._mark = { x:this.x, y:this.y, hp:this.hp };
+        spawnFx(this.x, this.y, 'perfume');
+        toast('调香师喷洒「忘忧之香」，标记当前位置');
+        return true;
+      } else {
+        const m = this._mark;
+        this._mark = null;
+        spawnFx(this.x, this.y, 'portal');
+        this.x = m.x; this.y = m.y;
+        this.hp = Math.max(this.hp, m.hp);
+        spawnFx(this.x, this.y, 'perfume');
+        toast('调香师发动回溯，回到香水标记点！');
+        return true;
+      }
+    } },
+  { id:'gardener', name:'园丁',       glyph:'❁',  tag:'拆椅', hp:2, speed:3.2,
+    skill:'巧手匠心', skillDesc:'拆除狂欢之椅，拖延监管者挂人', cd:15, color:'#8ad0a0',
+    useSkill(){ // 拆除一张狂欢之椅，令其暂时不可用
+      let target = null, bd = 1e9;
+      for(const c of CHAIRS){
+        if(c.broken) continue;
+        const d = Math.hypot(this.x - c.x, this.y - c.y);
+        if(d < 200 && d < bd){ bd = d; target = c; }
+      }
+      if(!target){ toast('附近没有可拆除的狂欢之椅'); return false; }
+      target.broken = true; target.brokenT = 20;
+      spawnFx(target.x, target.y, 'sabotage');
+      toast('园丁拆除了一张狂欢之椅！监管者暂时无法使用');
+      return true;
+    } },
 ];
+
+// AI 队友池（联机/单机补位时从这些角色里随机挑选）
+const AI_POOL_IDS = ['mercenary','doctor','seer','perfumer','gardener'];
+function pickAiPool(){
+  // 打乱后返回副本，保证每次补位角色随机
+  const arr = AI_POOL_IDS.map(id => ROLES.find(r => r.id === id)).filter(Boolean);
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
 
 let selectedRole = 0;
 function renderMenu(){
@@ -340,11 +384,12 @@ function startGame(){
 
   // 玩家 + AI 队友（共 4 求生者，玩家永远是最先那个）
   const spawns = [[150,470],[1450,470],[150,150],[1450,150]];
+  const aiPool = pickAiPool();
   const team = [
     makeSurvivor(role, spawns[0], true),
-    makeSurvivor(ROLES[1], spawns[1], false), // 佣兵
-    makeSurvivor(ROLES[2], spawns[2], false), // 医生
-    makeSurvivor(ROLES[4], spawns[3], false), // 先知
+    makeSurvivor(aiPool[0], spawns[1], false),
+    makeSurvivor(aiPool[1], spawns[2], false),
+    makeSurvivor(aiPool[2], spawns[3], false),
   ];
 
   game = {
@@ -551,6 +596,14 @@ function update(dt){
   if(h.fogCd > 0) h.fogCd -= dt;
   if(h.stunT > 0) h.stunT -= dt;
 
+  // 狂欢之椅恢复（园丁拆除后计时恢复）
+  for(const c of CHAIRS){
+    if(c.broken){
+      c.brokenT -= dt;
+      if(c.brokenT <= 0){ c.broken = false; spawnFx(c.x, c.y, 'repair'); toast('狂欢之椅已修复'); }
+    }
+  }
+
   // 特效更新
   for(let i=FX.length-1;i>=0;i--){ FX[i].t += dt; if(FX[i].t > FX[i].life) FX.splice(i,1); }
 
@@ -750,7 +803,7 @@ function hitSurvivor(s, h){
 
 function nearestChair(h){
   let b=null, bd=1e9;
-  for(const c of CHAIRS){ const d=dist(h,c); if(d<bd){bd=d;b=c;} }
+  for(const c of CHAIRS){ if(c.broken) continue; const d=dist(h,c); if(d<bd){bd=d;b=c;} }
   return b;
 }
 
@@ -879,14 +932,14 @@ function drawDoors(){
 
 function drawChairs(){
   for(const c of CHAIRS){
-    ctx.fillStyle = '#3a2030';
-    ctx.strokeStyle = '#6a4050';
+    ctx.fillStyle = c.broken ? '#2a2020' : '#3a2030';
+    ctx.strokeStyle = c.broken ? '#8a6a60' : '#6a4050';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(c.x, c.y, 16, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#c08aa0';
+    ctx.fillStyle = c.broken ? '#8a8078' : '#c08aa0';
     ctx.font = '16px sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('椅', c.x, c.y);
+    ctx.fillText(c.broken ? '碎' : '椅', c.x, c.y);
   }
 }
 
@@ -1010,6 +1063,15 @@ function drawFx(){
     } else if(f.type==='flash'){
       ctx.fillStyle='#fff';
       ctx.beginPath(); ctx.arc(0,0,16+f.t*10,0,Math.PI*2); ctx.fill();
+    } else if(f.type==='perfume'){
+      ctx.strokeStyle='#e8a0a0'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,14+f.t*22,0,Math.PI*2); ctx.stroke();
+    } else if(f.type==='sabotage'){
+      ctx.fillStyle='#b08a60';
+      for(let i=0;i<5;i++){ const ang = f.t*4 + i*1.25; ctx.beginPath(); ctx.arc(Math.cos(ang)*f.t*40, Math.sin(ang)*f.t*40, 4, 0, Math.PI*2); ctx.fill(); }
+    } else if(f.type==='repair'){
+      ctx.strokeStyle='#e8cf9a'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(0,0,12+f.t*24,0,Math.PI*2); ctx.stroke();
     }
     ctx.restore();
   }
@@ -1078,6 +1140,7 @@ const MP = {
 };
 
 // ---------- token 读取（与主站登录态一致） ----------
+const MP_API_BASE = 'http://192.168.68.35:8081';
 function mpGetToken(){
   try {
     return window.sessionStorage.getItem('idv_token') ||
@@ -1212,6 +1275,17 @@ async function mpJoin(){
   MP.roomId = res.roomId; MP.isHost = false; MP.myUserId = res.myUserId;
   mpEnterRoom();
 }
+// 外部（邀请）直接进房：roomId 已知，isHost 由调用方决定，无需再请求 join
+function mpJoinRoomById(roomId, isHost){
+  if(!roomId) return;
+  MP.roomId = roomId; MP.isHost = isHost;
+  // 从主站登录态读取自己的 userId
+  try {
+    const u = JSON.parse(sessionStorage.getItem('idv_user') || localStorage.getItem('idv_user') || 'null');
+    if(u && u.id) MP.myUserId = u.id;
+  } catch(e){ /* 忽略 */ }
+  mpEnterRoom();
+}
 function mpEnterRoom(){
   document.getElementById('lobbyEntry').style.display = 'none';
   document.getElementById('lobbyRoom').style.display = '';
@@ -1259,7 +1333,7 @@ async function mpApi(path, options){
   if(opt.body) opt.body = JSON.stringify(opt.body);
   let res;
   try {
-    res = await fetch(path, { method: opt.method, headers, body: opt.body });
+    res = await fetch(MP_API_BASE + path, { method: opt.method, headers, body: opt.body });
   } catch(e){
     toast('连接不上后端（' + path + '）'); return null;
   }
@@ -1349,7 +1423,7 @@ function mpStartLocalGame(){
 
   // 远端真人玩家按 slot 排序，放入 team[1..3]
   const remotes = Array.from(MP.remote.values()).sort((a,b)=>a.slot-b.slot);
-  const aiPool = [ROLES[1], ROLES[2], ROLES[4]]; // 佣兵/医生/先知
+  const aiPool = pickAiPool();
   let aiIdx = 0;
   for(let i=1;i<4;i++){
     const remote = remotes[i-1];
@@ -1468,6 +1542,27 @@ function applyAuthority(){
 
 // 服务端转发 host 广播的消息
 // 需要在 controller 增加 /game/host 端点 —— 通过 action 转发实现，见后端。
+
+// ---------- 邀请自动进房 ----------
+// 从好友页/邀请弹窗跳转过来时，读取 localStorage 标志自动进入联机大厅
+(function autoJoinFromInvite(){
+  let roomId = null, isHost = false;
+  try {
+    roomId = localStorage.getItem('idv_escape_join');
+    if(roomId){ isHost = false; localStorage.removeItem('idv_escape_join'); }
+  } catch(e){ /* 忽略 */ }
+  if(!roomId){
+    try {
+      roomId = localStorage.getItem('idv_escape_host');
+      if(roomId){ isHost = true; localStorage.removeItem('idv_escape_host'); }
+    } catch(e){ /* 忽略 */ }
+  }
+  if(roomId){
+    openLobby();
+    // 等 WebSocket 连上后再进房（openLobby 里已触发 mpConnect）
+    setTimeout(() => { mpJoinRoomById(roomId, isHost); }, 600);
+  }
+})();
 </script>
 </body>
 </html>

@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import NightSky from '../components/NightSky.vue'
 import FortuneCard from '../components/FortuneCard.vue'
 
@@ -92,15 +92,36 @@ const games = [
 
 const currentKey = ref('escape')
 const current = computed(() => games.find(g => g.key === currentKey.value))
+let flagTimer = null
 
 onMounted(() => {
-  // 收到五子棋邀请并接受后，自动切到五子棋 Tab
+  // 收到邀请（或被邀请后接受）跳转过来时，自动切到对应游戏 Tab。
+  // 注意：标志必须保留，由 game.html / gomoku.html 自己读取后再清除，
+  // 否则 iframe 尚未加载完，标志已被提前删除，会导致无法自动进房/进对局。
+  applyInviteFlag()
+  // 已在本页面时收到新邀请（onMounted 不会再次触发），用轻量轮询兜底
+  flagTimer = setInterval(applyInviteFlag, 1500)
+})
+
+onBeforeUnmount(() => {
+  if (flagTimer) { clearInterval(flagTimer); flagTimer = null }
+})
+
+function applyInviteFlag() {
   try {
-    if (localStorage.getItem('idv_gomoku_join')) {
-      currentKey.value = 'gomoku'
+    const gJoin = localStorage.getItem('idv_gomoku_join')
+    const gHost = localStorage.getItem('idv_gomoku_host')
+    if (gJoin || gHost) {
+      if (currentKey.value !== 'gomoku') currentKey.value = 'gomoku'
+      return
+    }
+    const eJoin = localStorage.getItem('idv_escape_join')
+    const eHost = localStorage.getItem('idv_escape_host')
+    if (eJoin || eHost) {
+      if (currentKey.value !== 'escape') currentKey.value = 'escape'
     }
   } catch (e) { /* 忽略 */ }
-})
+}
 
 function switchGame(key) {
   currentKey.value = key

@@ -89,6 +89,7 @@
                 <span class="req-name">{{ f.nickname }}</span>
                 <span class="f-sub">{{ f.status === 1 ? '离线' : '在线' }}</span>
               </div>
+              <button class="invite-friend" @click.stop="openInvite(f)" title="邀请联机">🎮</button>
               <button class="del-friend" @click.stop="onRemove(f)" title="删除好友">×</button>
             </div>
             <p v-if="!friends.length" class="empty">暂无好友，添加好友后即可聊天。</p>
@@ -110,7 +111,7 @@
                 </div>
               </div>
               <div class="chat-actions">
-                <RouterLink to="/community" class="link-btn teamup" title="去联机组队">🎮 联机组队</RouterLink>
+                <button class="link-btn teamup" @click="openInvite(activePeer)">🎮 邀请联机</button>
               </div>
             </header>
 
@@ -149,11 +150,34 @@
         </section>
       </div>
     </main>
+
+    <!-- 邀请联机弹窗 -->
+    <Transition name="pop">
+      <div v-if="inviteTarget" class="invite-mask" @click.self="inviteTarget = null">
+        <div class="invite-modal">
+          <h3 class="im-title">邀请「{{ inviteTarget.nickname }}」一起玩</h3>
+          <div class="im-games">
+            <button class="im-game" :disabled="inviting" @click="doInvite('gomoku')">
+              <span class="im-ico">⚫</span>
+              <span class="im-name">五子棋</span>
+              <span class="im-desc">双人对弈 · 实时落子</span>
+            </button>
+            <button class="im-game" :disabled="inviting" @click="doInvite('escape')">
+              <span class="im-ico">🕹</span>
+              <span class="im-name">逃脱对决 1v4</span>
+              <span class="im-desc">协作逃脱 · 对抗监管者</span>
+            </button>
+          </div>
+          <button class="im-close" @click="inviteTarget = null">取消</button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import NightSky from '../components/NightSky.vue'
@@ -164,9 +188,12 @@ import {
   fetchFriends, fetchFriendRequests, addFriend, searchUsers,
   acceptFriend, rejectFriend, removeFriend, fetchHistory, sendMessage
 } from '../api/social'
+import { inviteFriend as inviteGomoku } from '../api/gomoku'
+import { inviteFriend as inviteEscape } from '../api/game'
 
 const { show } = useToast()
 const { user } = useAuth()
+const router = useRouter()
 
 const friends = ref([])
 const requests = ref([])
@@ -280,6 +307,37 @@ async function onRemove(f) {
     await loadFriends()
   } catch (e) {
     show(e instanceof ApiError ? e.message : '操作失败')
+  }
+}
+
+// ---------- 邀请好友联机 ----------
+const inviteTarget = ref(null)   // 要邀请的好友对象
+const inviting = ref(false)      // 邀请请求中
+
+function openInvite(f) {
+  inviteTarget.value = f
+}
+
+async function doInvite(game) {
+  if (!inviteTarget.value || inviting.value) return
+  inviting.value = true
+  const f = inviteTarget.value
+  try {
+    if (game === 'gomoku') {
+      const data = await inviteGomoku(f.id)
+      try { localStorage.setItem('idv_gomoku_host', data.roomId) } catch (e) { /* 忽略 */ }
+      show(`已邀请「${f.nickname}」下五子棋，等待接受…`)
+    } else {
+      const data = await inviteEscape(f.id)
+      try { localStorage.setItem('idv_escape_host', data.roomId) } catch (e) { /* 忽略 */ }
+      show(`已邀请「${f.nickname}」玩逃脱对决，等待接受…`)
+    }
+    inviteTarget.value = null
+    router.push({ name: 'community' })
+  } catch (e) {
+    show(e instanceof ApiError ? e.message : '邀请失败')
+  } finally {
+    inviting.value = false
   }
 }
 
@@ -498,4 +556,26 @@ onBeforeUnmount(() => {
 .idle-sub { font-size: 0.8rem; opacity: 0.7; }
 
 .empty { text-align: center; color: var(--muted); padding: 20px 0; font-size: 13px; }
+
+/* ---------- 邀请联机 ---------- */
+.invite-friend { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 1px solid rgba(159,178,216,0.32); background: transparent; color: var(--gold-light); font-size: 13px; cursor: pointer; opacity: 0; transition: opacity .15s, background .15s, border-color .15s; display: grid; place-items: center; }
+.friend-item:hover .invite-friend { opacity: 1; }
+.invite-friend:hover { background: rgba(216,177,90,0.15); border-color: var(--gold); }
+
+.invite-mask { position: fixed; inset: 0; z-index: 70; background: rgba(2,6,18,0.7); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; }
+.invite-modal { width: 100%; max-width: 380px; background: rgba(9,20,46,0.98); border: 1px solid var(--border); border-radius: 16px; padding: 22px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+.invite-modal::before { content: ""; display: block; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.im-title { font-family: var(--font); font-size: 16px; color: var(--gold-light); letter-spacing: 1px; text-align: center; margin-bottom: 16px; }
+.im-games { display: flex; flex-direction: column; gap: 10px; }
+.im-game { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1px solid rgba(159,178,216,0.22); border-radius: 12px; background: rgba(255,255,255,0.03); color: var(--text); cursor: pointer; transition: .18s; text-align: left; }
+.im-game:hover { border-color: var(--gold); background: rgba(216,177,90,0.1); transform: translateY(-2px); }
+.im-game:disabled { opacity: 0.6; cursor: not-allowed; }
+.im-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: #1a1208; background: radial-gradient(circle at 32% 28%, var(--gold-light), var(--gold) 70%); }
+.im-name { flex: 1; font-size: 15px; font-weight: 700; }
+.im-desc { font-size: 11px; color: var(--muted); }
+.im-close { display: block; margin: 16px auto 0; padding: 7px 24px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; transition: .18s; }
+.im-close:hover { color: var(--gold-light); border-color: var(--gold); }
+
+.pop-enter-active, .pop-leave-active { transition: opacity .2s; }
+.pop-enter-from, .pop-leave-to { opacity: 0; }
 </style>

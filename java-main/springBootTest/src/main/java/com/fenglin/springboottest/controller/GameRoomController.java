@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,5 +63,65 @@ public class GameRoomController {
     @GetMapping("/room/{roomId}")
     public Result<List<GamePlayerVO>> room(@PathVariable("roomId") String roomId) {
         return Result.success(roomService.getPlayers(roomId));
+    }
+
+    // ---------- 好友邀请联机 ----------
+
+    /** 邀请好友联机：body { friendId }，返回 { roomId, myUserId } */
+    @PostMapping("/invite")
+    public Result<Map<String, Object>> invite(@RequestAttribute(ATTR_USER_ID) Long userId,
+                                              @RequestAttribute(ATTR_USER_NICKNAME) String nickname,
+                                              @RequestBody Map<String, Object> body) {
+        Long friendId = toLong(body == null ? null : body.get("friendId"));
+        return Result.success(roomService.inviteFriend(userId, nickname, friendId));
+    }
+
+    /** 接受邀请：body { roomId }，返回 { roomId, myUserId } */
+    @PostMapping("/accept")
+    public Result<Map<String, Object>> accept(@RequestAttribute(ATTR_USER_ID) Long userId,
+                                              @RequestAttribute(ATTR_USER_NICKNAME) String nickname,
+                                              @RequestBody Map<String, Object> body) {
+        String roomId = str(body == null ? null : body.get("roomId"));
+        return Result.success(roomService.acceptInvite(userId, nickname, roomId));
+    }
+
+    /** 拒绝邀请：body { roomId } */
+    @PostMapping("/decline")
+    public Result<Void> decline(@RequestAttribute(ATTR_USER_ID) Long userId,
+                                @RequestBody Map<String, Object> body) {
+        String roomId = str(body == null ? null : body.get("roomId"));
+        roomService.declineInvite(userId, roomId);
+        return Result.success();
+    }
+
+    /** 取消邀请：body { roomId } */
+    @PostMapping("/cancel")
+    public Result<Void> cancel(@RequestAttribute(ATTR_USER_ID) Long userId,
+                               @RequestBody Map<String, Object> body) {
+        String roomId = str(body == null ? null : body.get("roomId"));
+        roomService.cancelInvite(userId, roomId);
+        return Result.success();
+    }
+
+    /** 查询当前用户待处理的邀请 */
+    @GetMapping("/pending")
+    public Result<Map<String, Object>> pending(@RequestAttribute(ATTR_USER_ID) Long userId) {
+        return Result.success(roomService.pendingInvite(userId));
+    }
+
+    // ---------- 内部工具 ----------
+
+    private String str(Object o) {
+        return o == null ? null : String.valueOf(o);
+    }
+
+    private Long toLong(Object o) {
+        if (o == null) return null;
+        if (o instanceof Number n) return n.longValue();
+        try {
+            return Long.valueOf(String.valueOf(o));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
